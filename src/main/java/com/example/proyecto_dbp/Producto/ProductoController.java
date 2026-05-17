@@ -1,10 +1,14 @@
 package com.example.proyecto_dbp.Producto;
 
 
+import com.example.proyecto_dbp.Cloudinary.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.Map;
+import java.util.HashMap;
 
 import java.util.List;
 
@@ -14,6 +18,7 @@ import java.util.List;
 public class ProductoController {
 
     private final ProductoService productoService;
+    private final CloudinaryService cloudinaryService;
 
     // Obtener todos los productos (Devuelve lista de DTOs)
     @GetMapping
@@ -62,5 +67,15 @@ public class ProductoController {
     @GetMapping("/tipo/{tipo}")
     public ResponseEntity<List<ProductoResponseDTO>> buscarPorTipo(@PathVariable TipoProducto tipo) {
         return ResponseEntity.ok(productoService.filtrarPorTipo(tipo));
+    }
+
+    @PostMapping("/imagen")
+    public ResponseEntity<Map<String, String>> subirImagen(@RequestParam("file") MultipartFile file) {
+        String urlImagen = cloudinaryService.subirImagen(file);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("url", urlImagen);
+
+        return ResponseEntity.ok(response);
     }
 }
