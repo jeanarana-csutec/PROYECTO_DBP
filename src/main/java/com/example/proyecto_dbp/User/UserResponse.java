@@ -1,0 +1,16 @@
+// UserResponse.java
+package com.example.proyecto_dbp.User;
+
+import lombok.Getter;
+import lombok.Setter;
+import java.time.LocalDateTime;
+
+@Getter @Setter
+public class UserResponse {
+    private String nombre;
+    private String email;
+    private String universidad;
+    private String fotoUrl;
+    private LocalDateTime fechaRegistro;
+    private Rol rol;
+}

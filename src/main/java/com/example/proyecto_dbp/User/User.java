@@ -32,7 +32,8 @@ public class User implements UserDetails {
     @Column (nullable = false)
     private String password;
     @Enumerated(EnumType.STRING)
-    private Rol rol;
+    @Column(nullable = false)
+    private Rol rol = Rol.USER;
     private String universidad;
     private String fotoUrl;
     private LocalDateTime fechaRegistro;
