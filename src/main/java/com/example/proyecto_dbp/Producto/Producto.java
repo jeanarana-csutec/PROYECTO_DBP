@@ -59,7 +59,4 @@ public class Producto {
     @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL)
     private List<Mensaje> mensajes = new ArrayList<>();
 
-    // Usuarios que marcaron este producto como favorito
-    @ManyToMany(mappedBy = "favoritos")
-    private List<User> usuariosQueFavoritaron = new ArrayList<>();
 }

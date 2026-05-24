@@ -15,8 +15,5 @@ public interface ProductoRepository extends JpaRepository<Producto, Long> {
 
     List<Producto> findByEstado(EstadoProducto estado);
 
-    List<Producto> findByPrecioBetween(Double minPrecio, Double maxPrecio);
-
-    // Búsqueda por título (ignorando mayúsculas/minúsculas)
-    List<Producto> findByTituloContainingIgnoreCase(String titulo);
+    List<Producto> findByVendedorId(Long vendedorId);
 }

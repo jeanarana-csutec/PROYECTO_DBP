@@ -1,5 +1,6 @@
 package com.example.proyecto_dbp.Auth;
 
+import com.example.proyecto_dbp.Events.UsuarioRegistradoEvent;
 import com.example.proyecto_dbp.Exceptions.UserAlreadyExists;
 import com.example.proyecto_dbp.Security.JwtService;
 import com.example.proyecto_dbp.User.Rol;
@@ -7,6 +8,7 @@ import com.example.proyecto_dbp.User.User;
 import com.example.proyecto_dbp.User.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class AuthService {
 
+    private final ApplicationEventPublisher applicationEventPublisher;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
@@ -37,6 +40,7 @@ public class AuthService {
         user.setUniversidad(obtenerUniversidad(rq.getEmail()));
 
         user = userRepository.save(user);
+        applicationEventPublisher.publishEvent(new UsuarioRegistradoEvent(this, user));
 
         AuthResponse response = modelMapper.map(user, AuthResponse.class);
         response.setToken(jwtService.generateToken(user));

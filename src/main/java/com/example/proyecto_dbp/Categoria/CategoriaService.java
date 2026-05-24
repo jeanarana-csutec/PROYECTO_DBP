@@ -1,6 +1,11 @@
+// CategoriaService.java
 package com.example.proyecto_dbp.Categoria;
 
+import com.example.proyecto_dbp.Exceptions.DuplicateResource;
+import com.example.proyecto_dbp.Exceptions.ResourceNotFound;
+import com.example.proyecto_dbp.Exceptions.UserAlreadyExists;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,70 +17,45 @@ import java.util.stream.Collectors;
 public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
+    private final ModelMapper modelMapper;
 
     @Transactional(readOnly = true)
     public List<CategoriaResponseDTO> obtenerTodas() {
         return categoriaRepository.findAll().stream()
-                .map(this::convertirAResponseDTO)
+                .map(c -> modelMapper.map(c, CategoriaResponseDTO.class))
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public CategoriaResponseDTO obtenerPorId(Long id) {
         Categoria categoria = categoriaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con el id: " + id));
-        return convertirAResponseDTO(categoria);
+                .orElseThrow(() -> new ResourceNotFound("Categoría no encontrada con id: " + id));
+        return modelMapper.map(categoria, CategoriaResponseDTO.class);
     }
 
     @Transactional
-    public CategoriaResponseDTO crearCategoria(CategoriaRequestDTO dto) {
-        // Validamos que no exista otra categoría con el mismo nombre
-        if (categoriaRepository.findByNombre(dto.getNombre()).isPresent()) {
-            throw new RuntimeException("Ya existe una categoría con el nombre: " + dto.getNombre());
+    public CategoriaResponseDTO crear(CategoriaRequestDTO request) {
+        if (categoriaRepository.existsByNombre(request.getNombre())) {
+            throw new DuplicateResource("Ya existe una categoría con ese nombre");
         }
-
-        // Mapear RequestDTO -> Entidad
-        Categoria categoria = new Categoria();
-        categoria.setNombre(dto.getNombre());
-        categoria.setDescripcion(dto.getDescripcion());
-
-        Categoria categoriaGuardada = categoriaRepository.save(categoria);
-        return convertirAResponseDTO(categoriaGuardada);
+        Categoria categoria = modelMapper.map(request, Categoria.class);
+        return modelMapper.map(categoriaRepository.save(categoria), CategoriaResponseDTO.class);
     }
 
     @Transactional
-    public CategoriaResponseDTO actualizarCategoria(Long id, CategoriaRequestDTO dto) {
-        Categoria categoriaExistente = categoriaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada con el id: " + id));
-
-        // Si cambia el nombre, validar que el nuevo nombre no esté duplicado por otra categoría
-        if (!categoriaExistente.getNombre().equals(dto.getNombre()) &&
-                categoriaRepository.findByNombre(dto.getNombre()).isPresent()) {
-            throw new RuntimeException("Ya existe otra categoría con el nombre: " + dto.getNombre());
-        }
-
-        // Actualizamos los datos
-        categoriaExistente.setNombre(dto.getNombre());
-        categoriaExistente.setDescripcion(dto.getDescripcion());
-
-        Categoria categoriaActualizada = categoriaRepository.save(categoriaExistente);
-        return convertirAResponseDTO(categoriaActualizada);
+    public CategoriaResponseDTO actualizar(Long id, CategoriaRequestDTO request) {
+        Categoria categoria = categoriaRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFound("Categoría no encontrada con id: " + id));
+        categoria.setNombre(request.getNombre());
+        categoria.setDescripcion(request.getDescripcion());
+        return modelMapper.map(categoriaRepository.save(categoria), CategoriaResponseDTO.class);
     }
 
     @Transactional
-    public void eliminarCategoria(Long id) {
+    public void eliminar(Long id) {
         if (!categoriaRepository.existsById(id)) {
-            throw new RuntimeException("Categoría no encontrada");
+            throw new ResourceNotFound("Categoría no encontrada con id: " + id);
         }
         categoriaRepository.deleteById(id);
-    }
-
-    // --- MÉTODO AUXILIAR DE MAPEO (Entity -> ResponseDTO) ---
-    private CategoriaResponseDTO convertirAResponseDTO(Categoria categoria) {
-        CategoriaResponseDTO dto = new CategoriaResponseDTO();
-        dto.setId(categoria.getId());
-        dto.setNombre(categoria.getNombre());
-        dto.setDescripcion(categoria.getDescripcion());
-        return dto;
     }
 }

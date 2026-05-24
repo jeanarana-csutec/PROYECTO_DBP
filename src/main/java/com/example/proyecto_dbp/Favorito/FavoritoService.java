@@ -1,12 +1,14 @@
+// FavoritoService.java
 package com.example.proyecto_dbp.Favorito;
 
-
+import com.example.proyecto_dbp.Exceptions.*;
 import com.example.proyecto_dbp.Producto.Producto;
 import com.example.proyecto_dbp.Producto.ProductoRepository;
-import com.example.proyecto_dbp.Producto.ProductoResponseDTO;
 import com.example.proyecto_dbp.User.User;
 import com.example.proyecto_dbp.User.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,80 +23,64 @@ public class FavoritoService {
     private final FavoritoRepository favoritoRepository;
     private final ProductoRepository productoRepository;
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
+
+    private User getUsuarioAutenticado() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFound("Usuario no encontrado"));
+    }
 
     @Transactional
-    public FavoritoResponseDTO agregarFavorito(FavoritoRequestDTO dto) {
-        // 1. Validar duplicados de negocio
-        if (favoritoRepository.existsByUsuarioIdAndProductoId(dto.getUsuarioId(), dto.getProductoId())) {
-            throw new RuntimeException("El producto ya se encuentra en la lista de favoritos del usuario.");
+    public FavoritoResponseDTO agregar(Long productoId) {
+        User usuario = getUsuarioAutenticado();
+
+        Producto producto = productoRepository.findById(productoId)
+                .orElseThrow(() -> new ResourceNotFound("Producto no encontrado con id: " + productoId));
+
+        // No puedes marcar tu propio producto como favorito
+        if (producto.getVendedor().getId().equals(usuario.getId())) {
+            throw new InvalidOperation("No puedes marcar tu propio producto como favorito");
         }
 
-        // 2. Buscar entidades relacionadas
-        User usuario = userRepository.findById(dto.getUsuarioId())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getUsuarioId()));
+        // Ya está en favoritos
+        if (favoritoRepository.existsByUsuarioIdAndProductoId(usuario.getId(), productoId)) {
+            throw new InvalidOperation("Este producto ya está en tus favoritos");
+        }
 
-        Producto producto = productoRepository.findById(dto.getProductoId())
-                .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + dto.getProductoId()));
-
-        // 3. Crear y persistir la entidad intermedia
         Favorito favorito = new Favorito();
         favorito.setUsuario(usuario);
         favorito.setProducto(producto);
         favorito.setFechaAgregado(LocalDateTime.now());
 
-        Favorito favoritoGuardado = favoritoRepository.save(favorito);
-        return convertirAResponseDTO(favoritoGuardado);
-    }
-
-    @Transactional
-    public void eliminarFavorito(Long usuarioId, Long productoId) {
-        Favorito favorito = favoritoRepository.findByUsuarioIdAndProductoId(usuarioId, productoId)
-                .orElseThrow(() -> new RuntimeException("El producto no está en la lista de favoritos de este usuario."));
-
-        favoritoRepository.delete(favorito);
+        return toResponse(favoritoRepository.save(favorito));
     }
 
     @Transactional(readOnly = true)
-    public List<FavoritoResponseDTO> obtenerFavoritosPorUsuario(Long usuarioId) {
-        if (!userRepository.existsById(usuarioId)) {
-            throw new RuntimeException("Usuario no encontrado con ID: " + usuarioId);
-        }
-
-        return favoritoRepository.findByUsuarioId(usuarioId).stream()
-                .map(this::convertirAResponseDTO)
+    public List<FavoritoResponseDTO> misFavoritos() {
+        User usuario = getUsuarioAutenticado();
+        return favoritoRepository.findByUsuarioId(usuario.getId()).stream()
+                .map(this::toResponse)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public void eliminar(Long productoId) {
+        User usuario = getUsuarioAutenticado();
 
-    private FavoritoResponseDTO convertirAResponseDTO(Favorito favorito) {
-        FavoritoResponseDTO dto = new FavoritoResponseDTO();
-        dto.setId(favorito.getId());
-        dto.setFechaAgregado(favorito.getFechaAgregado());
-        dto.setProducto(mapearProductoADTO(favorito.getProducto()));
-        return dto;
+        Favorito favorito = favoritoRepository
+                .findByUsuarioIdAndProductoId(usuario.getId(), productoId)
+                .orElseThrow(() -> new ResourceNotFound("Este producto no está en tus favoritos"));
+
+        favoritoRepository.deleteById(favorito.getId());
     }
 
-    private ProductoResponseDTO mapearProductoADTO(Producto producto) {
-        ProductoResponseDTO dto = new ProductoResponseDTO();
-        dto.setId(producto.getId());
-        dto.setTitulo(producto.getTitulo());
-        dto.setDescripcion(producto.getDescripcion());
-        dto.setPrecio(producto.getPrecio());
-        dto.setTipo(producto.getTipo());
-        dto.setEstado(producto.getEstado());
-        dto.setImagenUrl(producto.getImagenUrl());
-        dto.setFechaPublicacion(producto.getFechaPublicacion());
-
-        if (producto.getVendedor() != null) {
-            dto.setVendedorId(producto.getVendedor().getId());
-            dto.setVendedorNombre(producto.getVendedor().getNombre());
-        }
-
-        if (producto.getCategoria() != null) {
-            dto.setCategoriaId(producto.getCategoria().getId());
-            dto.setCategoriaNombre(producto.getCategoria().getNombre());
-        }
-
+    private FavoritoResponseDTO toResponse(Favorito f) {
+        FavoritoResponseDTO dto = modelMapper.map(f, FavoritoResponseDTO.class);
+        dto.setProductoId(f.getProducto().getId());
+        dto.setProductoTitulo(f.getProducto().getTitulo());
+        dto.setProductoPrecio(f.getProducto().getPrecio());
+        dto.setFechaAgregado(f.getFechaAgregado());
         return dto;
     }
 }
