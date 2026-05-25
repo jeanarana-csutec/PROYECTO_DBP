@@ -44,7 +44,7 @@ class ProductoServiceTest {
         );
     }
 
-    // ===== MÉTODO AUXILIAR =====
+
     private User crearUsuario() {
         User user = new User();
         user.setId(1L);

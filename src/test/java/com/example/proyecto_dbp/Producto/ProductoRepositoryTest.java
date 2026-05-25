@@ -28,7 +28,7 @@ class ProductoRepositoryTest {
     @Autowired
     private UserRepository userRepository;
 
-    // ===== MÉTODO AUXILIAR =====
+
     private Producto crearProductoBase() {
 
         User user = new User();
