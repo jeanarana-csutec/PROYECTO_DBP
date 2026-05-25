@@ -37,12 +37,12 @@ public class Resena {
     }
 
     // Una reseña pertenece a una sola transacción (y solo puede haber una)
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "transaccion_id", nullable = false, unique = true)
     private Transaccion transaccion;
 
     // Muchas reseñas son escritas por un autor
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "autor_id", nullable = false)
     private User autor;
 }

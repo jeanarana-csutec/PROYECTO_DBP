@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Transacción Completada</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4;">
+    <table style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden;">
+        <tr>
+            <td style="background: #2196F3; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0;">¡Transacción Completada!</h1>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 30px;">
+                <p style="font-size: 16px;">Hola,</p>
+                <p style="font-size: 16px;">Tu transacción por el producto <strong th:text="${nombreProducto}">Producto</strong> con el vendedor <strong th:text="${nombreVendedor}">Vendedor</strong> ha sido completada.</p>
+                <p style="font-size: 16px;">Recuerda dejar una reseña de tu experiencia.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="background: #f4f4f4; padding: 15px; text-align: center; color: #666; font-size: 12px;">
+                Economía Circular Estudiantil
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

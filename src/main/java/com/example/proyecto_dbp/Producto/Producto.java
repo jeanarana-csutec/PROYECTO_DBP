@@ -51,12 +51,12 @@ public class Producto {
     }
 
     // Muchos productos pertenecen a un vendedor
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendedor_id", nullable = false)
     private User vendedor;
 
     // Muchos productos pertenecen a una categoría
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
 

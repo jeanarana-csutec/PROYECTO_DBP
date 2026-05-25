@@ -30,17 +30,17 @@ public class Transaccion {
     private LocalDateTime fechaFin;
 
     // Muchas transacciones pertenecen a un comprador
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "comprador_id", nullable = false)
     private User comprador;
 
     // Muchas transacciones pertenecen a un vendedor
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vendedor_id", nullable = false)
     private User vendedor;
 
     // Muchas transacciones referencian un producto
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 

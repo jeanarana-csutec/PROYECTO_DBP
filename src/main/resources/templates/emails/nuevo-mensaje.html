@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Nuevo Mensaje</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4;">
+    <table style="max-width: 600px; margin: 0 auto; background: white; border-radius: 8px; overflow: hidden;">
+        <tr>
+            <td style="background: #FF9800; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0;">Nuevo Mensaje</h1>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 30px;">
+                <p style="font-size: 16px;">Hola,</p>
+                <p style="font-size: 16px;">Tienes un nuevo mensaje de <strong th:text="${nombreEmisor}">Emisor</strong> sobre el producto <strong th:text="${productoTitulo}">Producto</strong>.</p>
+                <p style="font-size: 16px;">Ingresa a la plataforma para responder.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="background: #f4f4f4; padding: 15px; text-align: center; color: #666; font-size: 12px;">
+                Economía Circular Estudiantil
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

@@ -35,17 +35,17 @@ public class Mensaje {
     }
 
     // Muchos mensajes tienen un emisor
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "emisor_id", nullable = false)
     private User emisor;
 
     // Muchos mensajes tienen un receptor
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receptor_id", nullable = false)
     private User receptor;
 
     // Mensajes asociados a un producto específico
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 }
