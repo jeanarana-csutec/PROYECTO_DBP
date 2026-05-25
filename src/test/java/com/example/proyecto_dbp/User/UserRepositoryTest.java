@@ -1,4 +1,4 @@
-package com.example.proyecto_dbp.User;
+package com.example.proyecto_dbp.user;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -32,7 +32,7 @@ class UserRepositoryTest {
         user.setNombre("Juan Perez");
         user.setEmail("juan@test.com");
         user.setPassword("encodedPassword123");
-        user.setRol(Rol.USER);
+        user.setRole(Role.USER);
         user.setUniversidad("Universidad Catolica");
         user.setFotoUrl("https://example.com/foto.jpg");
         user.setFechaRegistro(LocalDateTime.now());

@@ -1,4 +1,4 @@
-package com.example.proyecto_dbp.Security;
+package com.example.proyecto_dbp.security;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

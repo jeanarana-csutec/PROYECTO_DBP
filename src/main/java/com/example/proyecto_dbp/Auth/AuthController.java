@@ -1,4 +1,4 @@
-package com.example.proyecto_dbp.Auth;
+package com.example.proyecto_dbp.auth;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,17 +16,17 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody AuthRequest r) {
+    public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest r) {
         return new ResponseEntity<>(authService.registro(r), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthLoginResponse> login(@Valid @RequestBody AuthLoginRequest r) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest r) {
         return new ResponseEntity<>(authService.login(r), HttpStatus.OK);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthLoginResponse> refresh(@Valid @RequestBody AuthRefreshRequest r) {
+    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshTokenRequest r) {
         return new ResponseEntity<>(authService.refresh(r.getRefreshToken()), HttpStatus.OK);
     }
 }

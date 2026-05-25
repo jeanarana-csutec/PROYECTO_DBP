@@ -1,7 +1,7 @@
-package com.example.proyecto_dbp.User;
+package com.example.proyecto_dbp.user;
 
-import com.example.proyecto_dbp.Exceptions.ResourceNotFound;
-import com.example.proyecto_dbp.Security.SecurityUtils;
+import com.example.proyecto_dbp.exception.ResourceNotFoundException;
+import com.example.proyecto_dbp.security.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,7 +52,7 @@ class UserServiceTest {
 
     private User user;
     private UserResponse userResponse;
-    private UserUpdateRequestDTO updateRequest;
+    private UserUpdateRequest updateRequest;
 
     @BeforeEach
     void setUp() {
@@ -61,7 +61,7 @@ class UserServiceTest {
         user.setNombre("Juan Perez");
         user.setEmail("juan@test.com");
         user.setPassword("encodedPassword");
-        user.setRol(Rol.USER);
+        user.setRole(Role.USER);
         user.setUniversidad("Universidad Catolica");
         user.setFotoUrl("https://example.com/foto.jpg");
         user.setFechaRegistro(LocalDateTime.now());
@@ -72,9 +72,9 @@ class UserServiceTest {
         userResponse.setEmail("juan@test.com");
         userResponse.setUniversidad("Universidad Catolica");
         userResponse.setFotoUrl("https://example.com/foto.jpg");
-        userResponse.setRol(Rol.USER);
+        userResponse.setRole(Role.USER);
 
-        updateRequest = new UserUpdateRequestDTO();
+        updateRequest = new UserUpdateRequest();
         updateRequest.setNombre("Juan Carlos Perez");
         updateRequest.setUniversidad("Universidad San Martin");
         updateRequest.setFotoUrl("https://example.com/nueva-foto.jpg");
@@ -125,14 +125,14 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("should throw ResourceNotFound when getting profile of non-existent user")
-    void shouldThrowResourceNotFoundWhenUserNotExistsInGetMiPerfil() {
+    @DisplayName("should throw ResourceNotFoundException when getting profile of non-existent user")
+    void shouldThrowResourceNotFoundExceptionWhenUserNotExistsInGetMiPerfil() {
         // Given
-        when(securityUtils.getUsuarioAutenticado()).thenThrow(new ResourceNotFound("Usuario no encontrado"));
+        when(securityUtils.getUsuarioAutenticado()).thenThrow(new ResourceNotFoundException("Usuario no encontrado"));
 
         // When/Then
         assertThatThrownBy(() -> userService.getMiPerfil())
-                .isInstanceOf(ResourceNotFound.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Usuario no encontrado");
     }
 
@@ -153,14 +153,14 @@ class UserServiceTest {
     }
 
     @Test
-    @DisplayName("should throw ResourceNotFound when getting user by non-existent id")
-    void shouldThrowResourceNotFoundWhenUserNotExistsInGetPorId() {
+    @DisplayName("should throw ResourceNotFoundException when getting user by non-existent id")
+    void shouldThrowResourceNotFoundExceptionWhenUserNotExistsInGetPorId() {
         // Given
         when(userRepository.findById(999L)).thenReturn(Optional.empty());
 
         // When/Then
         assertThatThrownBy(() -> userService.getPorId(999L))
-                .isInstanceOf(ResourceNotFound.class)
+                .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Usuario no encontrado con id: 999");
     }
 
@@ -198,9 +198,9 @@ class UserServiceTest {
         userService.actualizarPerfil(updateRequest);
 
         // Then
-        assertThat(user.getNombre()).isEqualTo("Juan Perez"); // No cambió
-        assertThat(user.getFotoUrl()).isEqualTo("https://example.com/foto.jpg"); // No cambió
-        assertThat(user.getUniversidad()).isEqualTo("Universidad San Martin"); // Sí cambió
+        assertThat(user.getNombre()).isEqualTo("Juan Perez"); // No cambiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³
+        assertThat(user.getFotoUrl()).isEqualTo("https://example.com/foto.jpg"); // No cambiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³
+        assertThat(user.getUniversidad()).isEqualTo("Universidad San Martin"); // SÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â­ cambiÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³
     }
 
     @Test

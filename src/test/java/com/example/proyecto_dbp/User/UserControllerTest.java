@@ -1,7 +1,7 @@
-package com.example.proyecto_dbp.User;
+package com.example.proyecto_dbp.user;
 
-import com.example.proyecto_dbp.Security.JwtAuthorizationFilter;
-import com.example.proyecto_dbp.Security.JwtService;
+import com.example.proyecto_dbp.security.JwtAuthorizationFilter;
+import com.example.proyecto_dbp.security.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +47,7 @@ class UserControllerTest {
     private JwtService jwtService;
 
     private UserResponse userResponse;
-    private UserUpdateRequestDTO updateRequest;
+    private UserUpdateRequest updateRequest;
 
     @BeforeEach
     void setUp() {
@@ -56,9 +56,9 @@ class UserControllerTest {
         userResponse.setEmail("juan@test.com");
         userResponse.setUniversidad("Universidad Catolica");
         userResponse.setFotoUrl("https://example.com/foto.jpg");
-        userResponse.setRol(Rol.USER);
+        userResponse.setRole(Role.USER);
 
-        updateRequest = new UserUpdateRequestDTO();
+        updateRequest = new UserUpdateRequest();
         updateRequest.setNombre("Juan Carlos Perez");
         updateRequest.setUniversidad("Universidad San Martin");
         updateRequest.setFotoUrl("https://example.com/nueva-foto.jpg");
@@ -74,7 +74,7 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("juan@test.com"))
                 .andExpect(jsonPath("$.nombre").value("Juan Perez"))
-                .andExpect(jsonPath("$.rol").value("USER"));
+                .andExpect(jsonPath("$.role").value("USER"));
     }
 
     @Test
@@ -93,7 +93,7 @@ class UserControllerTest {
     @DisplayName("should update profile when putting /me")
     @WithMockUser
     void shouldUpdateProfileWhenPutMe() throws Exception {
-        when(userService.actualizarPerfil(any(UserUpdateRequestDTO.class))).thenReturn(userResponse);
+        when(userService.actualizarPerfil(any(UserUpdateRequest.class))).thenReturn(userResponse);
 
         mockMvc.perform(put("/api/v1/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -115,11 +115,11 @@ class UserControllerTest {
     @Test
     @DisplayName("should return all users when admin role")
     @WithMockUser(roles = {"ADMIN"})
-    void shouldReturnAllUsersWhenAdminRole() throws Exception {
+    void shouldReturnAllUsersWhenAdminRolee() throws Exception {
         UserResponse userResponse2 = new UserResponse();
         userResponse2.setEmail("maria@test.com");
         userResponse2.setNombre("Maria Lopez");
-        userResponse2.setRol(Rol.USER);
+        userResponse2.setRole(Role.USER);
 
         List<UserResponse> users = Arrays.asList(userResponse, userResponse2);
         Page<UserResponse> page = new PageImpl<>(users);

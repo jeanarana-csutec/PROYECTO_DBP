@@ -1,8 +1,8 @@
-package com.example.proyecto_dbp.Auth;
+package com.example.proyecto_dbp.auth;
 
-import com.example.proyecto_dbp.Exceptions.GlobalExceptionHandler;
-import com.example.proyecto_dbp.Security.JwtAuthorizationFilter;
-import com.example.proyecto_dbp.Security.JwtService;
+import com.example.proyecto_dbp.exception.GlobalExceptionHandler;
+import com.example.proyecto_dbp.security.JwtAuthorizationFilter;
+import com.example.proyecto_dbp.security.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -45,13 +45,13 @@ class AuthControllerTest {
     @Test
     @DisplayName("should register user when POST /api/v1/auth/register")
     void shouldRegisterUser() throws Exception {
-        AuthRequest request = new AuthRequest();
+        RegisterRequest request = new RegisterRequest();
         request.setEmail("test@unsa.edu.pe");
         request.setPassword("password123");
 
-        AuthResponse response = new AuthResponse("token1", "refresh1", "Test User", LocalDateTime.now(), "unsa");
+        RegisterResponse response = new RegisterResponse("token1", "refresh1", "Test User", LocalDateTime.now(), "unsa");
 
-        when(authService.registro(any(AuthRequest.class))).thenReturn(response);
+        when(authService.registro(any(RegisterRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -64,13 +64,13 @@ class AuthControllerTest {
     @Test
     @DisplayName("should login user when POST /api/v1/auth/login")
     void shouldLoginUser() throws Exception {
-        AuthLoginRequest request = new AuthLoginRequest();
+        LoginRequest request = new LoginRequest();
         request.setEmail("test@unsa.edu.pe");
         request.setPassword("password123");
 
-        AuthLoginResponse response = new AuthLoginResponse("access-token", "refresh-token");
+        LoginResponse response = new LoginResponse("access-token", "refresh-token");
 
-        when(authService.login(any(AuthLoginRequest.class))).thenReturn(response);
+        when(authService.login(any(LoginRequest.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -83,10 +83,10 @@ class AuthControllerTest {
     @Test
     @DisplayName("should refresh token when POST /api/v1/auth/refresh")
     void shouldRefreshToken() throws Exception {
-        AuthRefreshRequest request = new AuthRefreshRequest();
+        RefreshTokenRequest request = new RefreshTokenRequest();
         request.setRefreshToken("old-refresh-token");
 
-        AuthLoginResponse response = new AuthLoginResponse("new-access", "new-refresh");
+        LoginResponse response = new LoginResponse("new-access", "new-refresh");
 
         when(authService.refresh("old-refresh-token")).thenReturn(response);
 
@@ -101,7 +101,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("should return 400 when register with invalid email")
     void shouldReturn400WhenRegisterWithInvalidEmail() throws Exception {
-        AuthRequest request = new AuthRequest();
+        RegisterRequest request = new RegisterRequest();
         request.setEmail("invalid-email");
         request.setPassword("password123");
 
@@ -114,7 +114,7 @@ class AuthControllerTest {
     @Test
     @DisplayName("should return 400 when register with short password")
     void shouldReturn400WhenRegisterWithShortPassword() throws Exception {
-        AuthRequest request = new AuthRequest();
+        RegisterRequest request = new RegisterRequest();
         request.setEmail("test@unsa.edu.pe");
         request.setPassword("123");
 

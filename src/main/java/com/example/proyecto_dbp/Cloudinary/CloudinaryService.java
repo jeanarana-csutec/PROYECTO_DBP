@@ -1,4 +1,4 @@
-package com.example.proyecto_dbp.Cloudinary;
+package com.example.proyecto_dbp.cloudinary;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;

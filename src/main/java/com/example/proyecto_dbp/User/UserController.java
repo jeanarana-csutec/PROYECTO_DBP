@@ -1,5 +1,5 @@
 // UserController.java
-package com.example.proyecto_dbp.User;
+package com.example.proyecto_dbp.user;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class UserController {
 
     // Actualizar mi perfil
     @PutMapping("/me")
-    public ResponseEntity<UserResponse> actualizarPerfil(@Valid @RequestBody UserUpdateRequestDTO request) {
+    public ResponseEntity<UserResponse> actualizarPerfil(@Valid @RequestBody UserUpdateRequest request) {
         return ResponseEntity.ok(userService.actualizarPerfil(request));
     }
 
@@ -48,7 +48,7 @@ public class UserController {
 
     // Solo ADMIN puede ver todos los usuarios
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRolee('ADMIN')")
     public ResponseEntity<Map<String, Object>> getTodos(@PageableDefault(size = 20) Pageable pageable) {
         Page<UserResponse> page = userService.getTodos(pageable);
         Map<String, Object> response = new HashMap<>();

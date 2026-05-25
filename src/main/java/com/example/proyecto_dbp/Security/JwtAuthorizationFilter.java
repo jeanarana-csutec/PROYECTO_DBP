@@ -1,6 +1,6 @@
-package com.example.proyecto_dbp.Security;
+package com.example.proyecto_dbp.security;
 
-import com.example.proyecto_dbp.User.UserService;
+import com.example.proyecto_dbp.user.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

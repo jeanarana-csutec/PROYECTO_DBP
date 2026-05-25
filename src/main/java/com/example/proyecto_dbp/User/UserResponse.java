@@ -1,5 +1,5 @@
 // UserResponse.java
-package com.example.proyecto_dbp.User;
+package com.example.proyecto_dbp.user;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -13,5 +13,5 @@ public class UserResponse {
     private String universidad;
     private String fotoUrl;
     private LocalDateTime fechaRegistro;
-    private Rol rol;
+    private Role role;
 }

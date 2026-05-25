@@ -1,7 +1,7 @@
-package com.example.proyecto_dbp.Config;
+package com.example.proyecto_dbp.config;
 
-import com.example.proyecto_dbp.Security.JwtAuthorizationFilter;
-import com.example.proyecto_dbp.User.UserService;
+import com.example.proyecto_dbp.security.JwtAuthorizationFilter;
+import com.example.proyecto_dbp.user.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

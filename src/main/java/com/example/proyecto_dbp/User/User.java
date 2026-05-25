@@ -1,8 +1,8 @@
-package com.example.proyecto_dbp.User;
+package com.example.proyecto_dbp.user;
 
-import com.example.proyecto_dbp.Mensaje.Mensaje;
-import com.example.proyecto_dbp.Producto.Producto;
-import com.example.proyecto_dbp.Transaccion.Transaccion;
+import com.example.proyecto_dbp.Message.Message;
+import com.example.proyecto_dbp.Product.Product;
+import com.example.proyecto_dbp.Transaction.Transaction;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,8 +34,8 @@ public class User implements UserDetails {
     @Column (nullable = false)
     private String password;
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Rol rol = Rol.USER;
+    @Column(name = "rol", nullable = false)
+    private Role role = Role.USER;
     private String universidad;
     private String fotoUrl;
     private LocalDateTime fechaRegistro;
@@ -50,21 +50,21 @@ public class User implements UserDetails {
 
     // Un usuario publica muchos productos
     @OneToMany(mappedBy = "vendedor", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Producto> productos = new ArrayList<>();
+    private List<Product> productos = new ArrayList<>();
     // Un usuario hace muchas transacciones como comprador
     @OneToMany(mappedBy = "comprador", cascade = CascadeType.ALL)
-    private List<Transaccion> compras = new ArrayList<>();
+    private List<Transaction> compras = new ArrayList<>();
     // Un usuario recibe muchas transacciones como vendedor
     @OneToMany(mappedBy = "vendedor", cascade = CascadeType.ALL)
-    private List<Transaccion> ventas = new ArrayList<>();
+    private List<Transaction> ventas = new ArrayList<>();
     @OneToMany(mappedBy = "emisor")
-    private List<Mensaje> mensajesEnviados = new ArrayList<>();
+    private List<Message> mensajesEnviados = new ArrayList<>();
     @OneToMany(mappedBy = "receptor")
-    private List<Mensaje> mensajesRecibidos = new ArrayList<>();
+    private List<Message> mensajesRecibidos = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_"+ rol.name()));
+        return List.of(new SimpleGrantedAuthority("ROLE_"+ role.name()));
     }
 
     @Override

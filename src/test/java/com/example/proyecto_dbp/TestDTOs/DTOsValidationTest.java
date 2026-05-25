@@ -1,26 +1,26 @@
 package com.example.proyecto_dbp.TestDTOs;
 
-import com.example.proyecto_dbp.Auth.AuthLoginRequest;
-import com.example.proyecto_dbp.Auth.AuthLoginResponse;
-import com.example.proyecto_dbp.Auth.AuthRefreshRequest;
-import com.example.proyecto_dbp.Auth.AuthRequest;
-import com.example.proyecto_dbp.Auth.AuthResponse;
-import com.example.proyecto_dbp.Categoria.CategoriaRequestDTO;
-import com.example.proyecto_dbp.Categoria.CategoriaResponseDTO;
-import com.example.proyecto_dbp.Favorito.FavoritoRequestDTO;
-import com.example.proyecto_dbp.Favorito.FavoritoResponseDTO;
-import com.example.proyecto_dbp.Mensaje.MensajeRequestDTO;
-import com.example.proyecto_dbp.Mensaje.MensajeResponseDTO;
-import com.example.proyecto_dbp.Producto.ProductoRequestDTO;
-import com.example.proyecto_dbp.Producto.ProductoResponseDTO;
-import com.example.proyecto_dbp.Producto.TipoProducto;
-import com.example.proyecto_dbp.Resena.ResenaRequestDTO;
-import com.example.proyecto_dbp.Resena.ResenaResponseDTO;
-import com.example.proyecto_dbp.Transaccion.TipoTransaccion;
-import com.example.proyecto_dbp.Transaccion.TransaccionRequestDTO;
-import com.example.proyecto_dbp.Transaccion.TransaccionResponseDTO;
-import com.example.proyecto_dbp.User.UserResponse;
-import com.example.proyecto_dbp.User.UserUpdateRequestDTO;
+import com.example.proyecto_dbp.auth.LoginRequest;
+import com.example.proyecto_dbp.auth.LoginResponse;
+import com.example.proyecto_dbp.auth.RefreshTokenRequest;
+import com.example.proyecto_dbp.auth.RegisterRequest;
+import com.example.proyecto_dbp.auth.RegisterResponse;
+import com.example.proyecto_dbp.Category.CategoryRequest;
+import com.example.proyecto_dbp.Category.CategoryResponse;
+import com.example.proyecto_dbp.Favorite.FavoriteRequest;
+import com.example.proyecto_dbp.Favorite.FavoriteResponse;
+import com.example.proyecto_dbp.Message.MessageRequest;
+import com.example.proyecto_dbp.Message.MessageResponse;
+import com.example.proyecto_dbp.Product.ProductRequest;
+import com.example.proyecto_dbp.Product.ProductResponse;
+import com.example.proyecto_dbp.Product.ProductType;
+import com.example.proyecto_dbp.Review.ReviewRequest;
+import com.example.proyecto_dbp.Review.ReviewResponse;
+import com.example.proyecto_dbp.Transaction.TransactionType;
+import com.example.proyecto_dbp.Transaction.TransactionRequest;
+import com.example.proyecto_dbp.Transaction.TransactionResponse;
+import com.example.proyecto_dbp.user.UserResponse;
+import com.example.proyecto_dbp.user.UserUpdateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,95 +38,95 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DTOsValidationTest {
 
     @Autowired
-    private JacksonTester<AuthLoginRequest> authLoginRequestTester;
+    private JacksonTester<LoginRequest> authLoginRequestTester;
     @Autowired
-    private JacksonTester<AuthLoginResponse> authLoginResponseTester;
+    private JacksonTester<LoginResponse> authLoginResponseTester;
     @Autowired
-    private JacksonTester<AuthRefreshRequest> authRefreshRequestTester;
+    private JacksonTester<RefreshTokenRequest> authRefreshRequestTester;
     @Autowired
-    private JacksonTester<AuthRequest> authRequestTester;
+    private JacksonTester<RegisterRequest> authRequestTester;
     @Autowired
-    private JacksonTester<AuthResponse> authResponseTester;
+    private JacksonTester<RegisterResponse> authResponseTester;
     @Autowired
-    private JacksonTester<UserUpdateRequestDTO> userUpdateRequestTester;
+    private JacksonTester<UserUpdateRequest> userUpdateRequestTester;
     @Autowired
     private JacksonTester<UserResponse> userResponseTester;
     @Autowired
-    private JacksonTester<ProductoRequestDTO> productoRequestTester;
+    private JacksonTester<ProductRequest> productoRequestTester;
     @Autowired
-    private JacksonTester<ProductoResponseDTO> productoResponseTester;
+    private JacksonTester<ProductResponse> productoResponseTester;
     @Autowired
-    private JacksonTester<CategoriaRequestDTO> categoriaRequestTester;
+    private JacksonTester<CategoryRequest> categoriaRequestTester;
     @Autowired
-    private JacksonTester<CategoriaResponseDTO> categoriaResponseTester;
+    private JacksonTester<CategoryResponse> categoriaResponseTester;
     @Autowired
-    private JacksonTester<TransaccionRequestDTO> transaccionRequestTester;
+    private JacksonTester<TransactionRequest> transaccionRequestTester;
     @Autowired
-    private JacksonTester<TransaccionResponseDTO> transaccionResponseTester;
+    private JacksonTester<TransactionResponse> transaccionResponseTester;
     @Autowired
-    private JacksonTester<FavoritoRequestDTO> favoritoRequestTester;
+    private JacksonTester<FavoriteRequest> favoritoRequestTester;
     @Autowired
-    private JacksonTester<FavoritoResponseDTO> favoritoResponseTester;
+    private JacksonTester<FavoriteResponse> favoritoResponseTester;
     @Autowired
-    private JacksonTester<ResenaRequestDTO> resenaRequestTester;
+    private JacksonTester<ReviewRequest> resenaRequestTester;
     @Autowired
-    private JacksonTester<ResenaResponseDTO> resenaResponseTester;
+    private JacksonTester<ReviewResponse> resenaResponseTester;
     @Autowired
-    private JacksonTester<MensajeRequestDTO> mensajeRequestTester;
+    private JacksonTester<MessageRequest> mensajeRequestTester;
     @Autowired
-    private JacksonTester<MensajeResponseDTO> mensajeResponseTester;
+    private JacksonTester<MessageResponse> mensajeResponseTester;
 
     // ========== AUTH DTOs ==========
 
     @Test
-    @DisplayName("should serialize and deserialize AuthLoginRequest")
-    void testAuthLoginRequest() throws Exception {
-        AuthLoginRequest request = new AuthLoginRequest();
+    @DisplayName("should serialize and deserialize LoginRequest")
+    void testLoginRequest() throws Exception {
+        LoginRequest request = new LoginRequest();
         request.setEmail("test@test.com");
         request.setPassword("password123");
 
-        JsonContent<AuthLoginRequest> json = authLoginRequestTester.write(request);
+        JsonContent<LoginRequest> json = authLoginRequestTester.write(request);
 
         assertThat(json).extractingJsonPathStringValue("$.email").isEqualTo("test@test.com");
         assertThat(json).extractingJsonPathStringValue("$.password").isEqualTo("password123");
 
-        AuthLoginRequest deserialized = authLoginRequestTester.parse(json.getJson()).getObject();
+        LoginRequest deserialized = authLoginRequestTester.parse(json.getJson()).getObject();
         assertThat(deserialized.getEmail()).isEqualTo("test@test.com");
     }
 
     @Test
-    @DisplayName("should serialize and deserialize AuthRequest")
-    void testAuthRequest() throws Exception {
-        AuthRequest request = new AuthRequest();
+    @DisplayName("should serialize and deserialize RegisterRequest")
+    void testRegisterRequest() throws Exception {
+        RegisterRequest request = new RegisterRequest();
         request.setEmail("test@test.com");
         request.setPassword("password123");
 
-        JsonContent<AuthRequest> json = authRequestTester.write(request);
+        JsonContent<RegisterRequest> json = authRequestTester.write(request);
 
         assertThat(json).extractingJsonPathStringValue("$.email").isEqualTo("test@test.com");
         assertThat(json).extractingJsonPathStringValue("$.password").isEqualTo("password123");
 
-        AuthRequest deserialized = authRequestTester.parse(json.getJson()).getObject();
+        RegisterRequest deserialized = authRequestTester.parse(json.getJson()).getObject();
         assertThat(deserialized.getEmail()).isEqualTo("test@test.com");
     }
 
     @Test
-    @DisplayName("should serialize and deserialize AuthResponse")
-    void testAuthResponse() throws Exception {
-        AuthResponse response = new AuthResponse();
+    @DisplayName("should serialize and deserialize RegisterResponse")
+    void testRegisterResponse() throws Exception {
+        RegisterResponse response = new RegisterResponse();
         response.setToken("jwt-token-123");
         response.setRefreshToken("refresh-token-456");
         response.setNombre("Test User");
         response.setUniversidad("Test University");
         response.setFechaRegistro(LocalDateTime.now());
 
-        JsonContent<AuthResponse> json = authResponseTester.write(response);
+        JsonContent<RegisterResponse> json = authResponseTester.write(response);
 
         assertThat(json).extractingJsonPathStringValue("$.token").isEqualTo("jwt-token-123");
         assertThat(json).extractingJsonPathStringValue("$.nombre").isEqualTo("Test User");
         assertThat(json).extractingJsonPathStringValue("$.universidad").isEqualTo("Test University");
 
-        AuthResponse deserialized = authResponseTester.parse(json.getJson()).getObject();
+        RegisterResponse deserialized = authResponseTester.parse(json.getJson()).getObject();
         assertThat(deserialized.getToken()).isEqualTo("jwt-token-123");
         assertThat(deserialized.getNombre()).isEqualTo("Test User");
     }
@@ -134,20 +134,20 @@ class DTOsValidationTest {
     // ========== USER DTOs ==========
 
     @Test
-    @DisplayName("should serialize and deserialize UserUpdateRequestDTO")
+    @DisplayName("should serialize and deserialize UserUpdateRequest")
     void testUserUpdateRequest() throws Exception {
-        UserUpdateRequestDTO request = new UserUpdateRequestDTO();
+        UserUpdateRequest request = new UserUpdateRequest();
         request.setNombre("Updated Name");
         request.setFotoUrl("https://example.com/photo.jpg");
         request.setUniversidad("Updated University");
 
-        JsonContent<UserUpdateRequestDTO> json = userUpdateRequestTester.write(request);
+        JsonContent<UserUpdateRequest> json = userUpdateRequestTester.write(request);
 
         assertThat(json).extractingJsonPathStringValue("$.nombre").isEqualTo("Updated Name");
         assertThat(json).extractingJsonPathStringValue("$.fotoUrl").isEqualTo("https://example.com/photo.jpg");
         assertThat(json).extractingJsonPathStringValue("$.universidad").isEqualTo("Updated University");
 
-        UserUpdateRequestDTO deserialized = userUpdateRequestTester.parse(json.getJson()).getObject();
+        UserUpdateRequest deserialized = userUpdateRequestTester.parse(json.getJson()).getObject();
         assertThat(deserialized.getNombre()).isEqualTo("Updated Name");
     }
 
@@ -171,147 +171,147 @@ class DTOsValidationTest {
     // ========== PRODUCTO DTOs ==========
 
     @Test
-    @DisplayName("should serialize and deserialize ProductoRequestDTO")
-    void testProductoRequest() throws Exception {
-        ProductoRequestDTO request = new ProductoRequestDTO();
+    @DisplayName("should serialize and deserialize ProductRequest")
+    void testProductRequest() throws Exception {
+        ProductRequest request = new ProductRequest();
         request.setTitulo("iPhone 14");
         request.setDescripcion("Smartphone Apple");
         request.setPrecio(1000.0);
-        request.setTipo(TipoProducto.VENTA);
-        request.setCategoriaId(1L);
+        request.setTipo(ProductType.VENTA);
+        request.setCategoryId(1L);
 
-        JsonContent<ProductoRequestDTO> json = productoRequestTester.write(request);
+        JsonContent<ProductRequest> json = productoRequestTester.write(request);
 
         assertThat(json).extractingJsonPathStringValue("$.titulo").isEqualTo("iPhone 14");
         assertThat(json).extractingJsonPathNumberValue("$.precio").isEqualTo(1000.0);
 
-        ProductoRequestDTO deserialized = productoRequestTester.parse(json.getJson()).getObject();
+        ProductRequest deserialized = productoRequestTester.parse(json.getJson()).getObject();
         assertThat(deserialized.getTitulo()).isEqualTo("iPhone 14");
     }
 
     // ========== CATEGORIA DTOs ==========
 
     @Test
-    @DisplayName("should serialize and deserialize CategoriaRequestDTO")
-    void testCategoriaRequest() throws Exception {
-        CategoriaRequestDTO request = new CategoriaRequestDTO();
-        request.setNombre("Electrónica");
-        request.setDescripcion("Productos electrónicos");
+    @DisplayName("should serialize and deserialize CategoryRequest")
+    void testCategoryRequest() throws Exception {
+        CategoryRequest request = new CategoryRequest();
+        request.setNombre("ElectrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³nica");
+        request.setDescripcion("Products electrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³nicos");
 
-        JsonContent<CategoriaRequestDTO> json = categoriaRequestTester.write(request);
+        JsonContent<CategoryRequest> json = categoriaRequestTester.write(request);
 
-        assertThat(json).extractingJsonPathStringValue("$.nombre").isEqualTo("Electrónica");
+        assertThat(json).extractingJsonPathStringValue("$.nombre").isEqualTo("ElectrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³nica");
 
-        CategoriaRequestDTO deserialized = categoriaRequestTester.parse(json.getJson()).getObject();
-        assertThat(deserialized.getNombre()).isEqualTo("Electrónica");
+        CategoryRequest deserialized = categoriaRequestTester.parse(json.getJson()).getObject();
+        assertThat(deserialized.getNombre()).isEqualTo("ElectrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³nica");
     }
 
     @Test
-    @DisplayName("should serialize and deserialize CategoriaResponseDTO")
-    void testCategoriaResponse() throws Exception {
-        CategoriaResponseDTO response = new CategoriaResponseDTO();
+    @DisplayName("should serialize and deserialize CategoryResponse")
+    void testCategoryResponse() throws Exception {
+        CategoryResponse response = new CategoryResponse();
         response.setId(1L);
-        response.setNombre("Electrónica");
-        response.setDescripcion("Productos electrónicos");
+        response.setNombre("ElectrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³nica");
+        response.setDescripcion("Products electrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³nicos");
 
-        JsonContent<CategoriaResponseDTO> json = categoriaResponseTester.write(response);
+        JsonContent<CategoryResponse> json = categoriaResponseTester.write(response);
 
         assertThat(json).extractingJsonPathNumberValue("$.id").isEqualTo(1);
-        assertThat(json).extractingJsonPathStringValue("$.nombre").isEqualTo("Electrónica");
+        assertThat(json).extractingJsonPathStringValue("$.nombre").isEqualTo("ElectrÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â³nica");
     }
 
     // ========== TRANSACCION DTOs ==========
 
     @Test
-    @DisplayName("should serialize and deserialize TransaccionRequestDTO")
-    void testTransaccionRequest() throws Exception {
-        TransaccionRequestDTO request = new TransaccionRequestDTO();
-        request.setProductoId(1L);
-        request.setTipo(TipoTransaccion.COMPRA);
+    @DisplayName("should serialize and deserialize TransactionRequest")
+    void testTransactionRequest() throws Exception {
+        TransactionRequest request = new TransactionRequest();
+        request.setProductId(1L);
+        request.setTipo(TransactionType.COMPRA);
 
-        JsonContent<TransaccionRequestDTO> json = transaccionRequestTester.write(request);
+        JsonContent<TransactionRequest> json = transaccionRequestTester.write(request);
 
-        assertThat(json).extractingJsonPathNumberValue("$.productoId").isEqualTo(1);
+        assertThat(json).extractingJsonPathNumberValue("$.productId").isEqualTo(1);
         assertThat(json).extractingJsonPathStringValue("$.tipo").isEqualTo("COMPRA");
 
-        TransaccionRequestDTO deserialized = transaccionRequestTester.parse(json.getJson()).getObject();
-        assertThat(deserialized.getProductoId()).isEqualTo(1L);
+        TransactionRequest deserialized = transaccionRequestTester.parse(json.getJson()).getObject();
+        assertThat(deserialized.getProductId()).isEqualTo(1L);
     }
 
     // ========== FAVORITO DTOs ==========
 
     @Test
-    @DisplayName("should serialize and deserialize FavoritoRequestDTO")
-    void testFavoritoRequest() throws Exception {
-        FavoritoRequestDTO request = new FavoritoRequestDTO();
-        request.setUsuarioId(1L);
-        request.setProductoId(2L);
+    @DisplayName("should serialize and deserialize FavoriteRequest")
+    void testFavoriteRequest() throws Exception {
+        FavoriteRequest request = new FavoriteRequest();
+        request.setUserId(1L);
+        request.setProductId(2L);
 
-        JsonContent<FavoritoRequestDTO> json = favoritoRequestTester.write(request);
+        JsonContent<FavoriteRequest> json = favoritoRequestTester.write(request);
 
-        assertThat(json).extractingJsonPathNumberValue("$.usuarioId").isEqualTo(1);
-        assertThat(json).extractingJsonPathNumberValue("$.productoId").isEqualTo(2);
+        assertThat(json).extractingJsonPathNumberValue("$.userId").isEqualTo(1);
+        assertThat(json).extractingJsonPathNumberValue("$.productId").isEqualTo(2);
 
-        FavoritoRequestDTO deserialized = favoritoRequestTester.parse(json.getJson()).getObject();
-        assertThat(deserialized.getUsuarioId()).isEqualTo(1L);
+        FavoriteRequest deserialized = favoritoRequestTester.parse(json.getJson()).getObject();
+        assertThat(deserialized.getUserId()).isEqualTo(1L);
     }
 
     @Test
-    @DisplayName("should serialize and deserialize FavoritoResponseDTO")
-    void testFavoritoResponse() throws Exception {
-        FavoritoResponseDTO response = new FavoritoResponseDTO();
+    @DisplayName("should serialize and deserialize FavoriteResponse")
+    void testFavoriteResponse() throws Exception {
+        FavoriteResponse response = new FavoriteResponse();
         response.setId(1L);
-        response.setProductoId(2L);
-        response.setProductoTitulo("iPhone 14");
-        response.setProductoPrecio(1000.0);
+        response.setProductId(2L);
+        response.setProductTitle("iPhone 14");
+        response.setProductPrice(1000.0);
         response.setFechaAgregado(LocalDateTime.now());
 
-        JsonContent<FavoritoResponseDTO> json = favoritoResponseTester.write(response);
+        JsonContent<FavoriteResponse> json = favoritoResponseTester.write(response);
 
         assertThat(json).extractingJsonPathNumberValue("$.id").isEqualTo(1);
-        assertThat(json).extractingJsonPathNumberValue("$.productoId").isEqualTo(2);
-        assertThat(json).extractingJsonPathStringValue("$.productoTitulo").isEqualTo("iPhone 14");
+        assertThat(json).extractingJsonPathNumberValue("$.productId").isEqualTo(2);
+        assertThat(json).extractingJsonPathStringValue("$.productTitle").isEqualTo("iPhone 14");
 
-        FavoritoResponseDTO deserialized = favoritoResponseTester.parse(json.getJson()).getObject();
+        FavoriteResponse deserialized = favoritoResponseTester.parse(json.getJson()).getObject();
         assertThat(deserialized.getId()).isEqualTo(1L);
-        assertThat(deserialized.getProductoTitulo()).isEqualTo("iPhone 14");
+        assertThat(deserialized.getProductTitle()).isEqualTo("iPhone 14");
     }
 
     // ========== RESENA DTOs ==========
 
     @Test
-    @DisplayName("should serialize and deserialize ResenaRequestDTO")
-    void testResenaRequest() throws Exception {
-        ResenaRequestDTO request = new ResenaRequestDTO();
+    @DisplayName("should serialize and deserialize ReviewRequest")
+    void testReviewRequest() throws Exception {
+        ReviewRequest request = new ReviewRequest();
         request.setPuntuacion(5);
         request.setComentario("Excelente producto");
-        request.setTransaccionId(1L);
+        request.setTransactionId(1L);
 
-        JsonContent<ResenaRequestDTO> json = resenaRequestTester.write(request);
+        JsonContent<ReviewRequest> json = resenaRequestTester.write(request);
 
         assertThat(json).extractingJsonPathNumberValue("$.puntuacion").isEqualTo(5);
         assertThat(json).extractingJsonPathStringValue("$.comentario").isEqualTo("Excelente producto");
 
-        ResenaRequestDTO deserialized = resenaRequestTester.parse(json.getJson()).getObject();
+        ReviewRequest deserialized = resenaRequestTester.parse(json.getJson()).getObject();
         assertThat(deserialized.getPuntuacion()).isEqualTo(5);
     }
 
     // ========== MENSAJE DTOs ==========
 
     @Test
-    @DisplayName("should serialize and deserialize MensajeRequestDTO")
-    void testMensajeRequest() throws Exception {
-        MensajeRequestDTO request = new MensajeRequestDTO();
+    @DisplayName("should serialize and deserialize MessageRequest")
+    void testMessageRequest() throws Exception {
+        MessageRequest request = new MessageRequest();
         request.setReceptorId(1L);
-        request.setProductoId(2L);
-        request.setContenido("Hola, ¿está disponible?");
+        request.setProductId(2L);
+        request.setContenido("Hola, ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿estÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡ disponible?");
 
-        JsonContent<MensajeRequestDTO> json = mensajeRequestTester.write(request);
+        JsonContent<MessageRequest> json = mensajeRequestTester.write(request);
 
         assertThat(json).extractingJsonPathNumberValue("$.receptorId").isEqualTo(1);
-        assertThat(json).extractingJsonPathStringValue("$.contenido").isEqualTo("Hola, ¿está disponible?");
+        assertThat(json).extractingJsonPathStringValue("$.contenido").isEqualTo("Hola, ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿estÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡ disponible?");
 
-        MensajeRequestDTO deserialized = mensajeRequestTester.parse(json.getJson()).getObject();
-        assertThat(deserialized.getContenido()).isEqualTo("Hola, ¿está disponible?");
+        MessageRequest deserialized = mensajeRequestTester.parse(json.getJson()).getObject();
+        assertThat(deserialized.getContenido()).isEqualTo("Hola, ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿estÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡ disponible?");
     }
 }

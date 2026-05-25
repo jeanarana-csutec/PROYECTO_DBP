@@ -1,9 +1,9 @@
-package com.example.proyecto_dbp.Config;
+package com.example.proyecto_dbp.config;
 
 import com.cloudinary.provisioning.Account;
-import com.example.proyecto_dbp.User.Rol;
-import com.example.proyecto_dbp.User.User;
-import com.example.proyecto_dbp.User.UserRepository;
+import com.example.proyecto_dbp.user.Role;
+import com.example.proyecto_dbp.user.User;
+import com.example.proyecto_dbp.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +25,7 @@ public class DataSeeder implements CommandLineRunner {
             admin.setNombre("admin");
             admin.setEmail("admin@gmail.com");
             admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setRol(Rol.ADMIN);
+            admin.setRole(Role.ADMIN);
             userRepository.save(admin);
         }
     }

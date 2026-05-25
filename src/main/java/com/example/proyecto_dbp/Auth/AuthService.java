@@ -1,13 +1,13 @@
-package com.example.proyecto_dbp.Auth;
+package com.example.proyecto_dbp.auth;
 
-import com.example.proyecto_dbp.Events.UsuarioRegistradoEvent;
-import com.example.proyecto_dbp.Exceptions.InvalidOperation;
-import com.example.proyecto_dbp.Exceptions.ResourceNotFound;
-import com.example.proyecto_dbp.Exceptions.UserAlreadyExists;
-import com.example.proyecto_dbp.Security.JwtService;
-import com.example.proyecto_dbp.User.Rol;
-import com.example.proyecto_dbp.User.User;
-import com.example.proyecto_dbp.User.UserRepository;
+import com.example.proyecto_dbp.event.UserRegisteredEvent;
+import com.example.proyecto_dbp.exception.InvalidOperationException;
+import com.example.proyecto_dbp.exception.ResourceNotFoundException;
+import com.example.proyecto_dbp.exception.UserAlreadyExistsException;
+import com.example.proyecto_dbp.security.JwtService;
+import com.example.proyecto_dbp.user.Role;
+import com.example.proyecto_dbp.user.User;
+import com.example.proyecto_dbp.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
@@ -28,31 +28,31 @@ public class AuthService {
     private final JwtService jwtService;
     private final ModelMapper modelMapper;
 
-    public AuthResponse registro(AuthRequest rq) {
+    public RegisterResponse registro(RegisterRequest rq) {
         if (userRepository.existsByEmail(rq.getEmail())) {
-            throw new UserAlreadyExists("Este usuario ya existe");
+            throw new UserAlreadyExistsException("Este usuario ya existe");
         }
 
         User user = new User();
         user.setNombre(generarUsername(rq.getEmail()));
         user.setEmail(rq.getEmail());
         user.setPassword(passwordEncoder.encode(rq.getPassword()));
-        user.setRol(Rol.USER);
+        user.setRole(Role.USER);
         user.setFechaRegistro(LocalDateTime.now());
         user.setUniversidad(obtenerUniversidad(rq.getEmail()));
 
         user = userRepository.save(user);
-        applicationEventPublisher.publishEvent(new UsuarioRegistradoEvent(this, user));
+        applicationEventPublisher.publishEvent(new UserRegisteredEvent(this, user));
 
-        AuthResponse response = modelMapper.map(user, AuthResponse.class);
+        RegisterResponse response = modelMapper.map(user, RegisterResponse.class);
         response.setToken(jwtService.generateToken(user));
         response.setRefreshToken(jwtService.generateRefreshToken(user));
         return response;
     }
 
-    public AuthLoginResponse login(AuthLoginRequest rq) {
+    public LoginResponse login(LoginRequest rq) {
         User user = userRepository.findByEmail(rq.getEmail())
-                .orElseThrow(() -> new ResourceNotFound("No existe el usuario"));
+                .orElseThrow(() -> new ResourceNotFoundException("No existe el usuario"));
 
         if (!passwordEncoder.matches(rq.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Password incorrecta");
@@ -60,7 +60,7 @@ public class AuthService {
 
         String accessToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-        return new AuthLoginResponse(accessToken, refreshToken);
+        return new LoginResponse(accessToken, refreshToken);
     }
 
     public String obtenerUniversidad(String email) {
@@ -78,16 +78,16 @@ public class AuthService {
         return capitalize(datos[0]);
     }
 
-    public AuthLoginResponse refresh(String refreshToken) {
+    public LoginResponse refresh(String refreshToken) {
         if (!jwtService.isTokenValid(refreshToken)) {
-            throw new InvalidOperation("Token de refresco inválido o expirado");
+            throw new InvalidOperationException("Token de refresco invÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡lido o expirado");
         }
         String email = jwtService.extractUsername(refreshToken);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFound("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         String newAccessToken = jwtService.generateToken(user);
         String newRefreshToken = jwtService.generateRefreshToken(user);
-        return new AuthLoginResponse(newAccessToken, newRefreshToken);
+        return new LoginResponse(newAccessToken, newRefreshToken);
     }
 
     private String capitalize(String str) {

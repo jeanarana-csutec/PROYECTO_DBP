@@ -1,4 +1,4 @@
-package com.example.proyecto_dbp.Cloudinary;
+package com.example.proyecto_dbp.cloudinary;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

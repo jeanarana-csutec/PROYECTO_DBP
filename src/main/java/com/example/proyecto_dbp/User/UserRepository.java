@@ -1,4 +1,4 @@
-package com.example.proyecto_dbp.User;
+package com.example.proyecto_dbp.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.userdetails.UserDetails;

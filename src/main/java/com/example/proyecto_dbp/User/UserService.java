@@ -1,8 +1,8 @@
 // UserService.java
-package com.example.proyecto_dbp.User;
+package com.example.proyecto_dbp.user;
 
-import com.example.proyecto_dbp.Exceptions.*;
-import com.example.proyecto_dbp.Security.SecurityUtils;
+import com.example.proyecto_dbp.exception.*;
+import com.example.proyecto_dbp.security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -35,12 +35,12 @@ public class UserService implements UserDetailsService {
     @Transactional(readOnly = true)
     public UserResponse getPorId(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFound("Usuario no encontrado con id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + id));
         return modelMapper.map(user, UserResponse.class);
     }
 
     @Transactional
-    public UserResponse actualizarPerfil(UserUpdateRequestDTO request) {
+    public UserResponse actualizarPerfil(UserUpdateRequest request) {
         User user = securityUtils.getUsuarioAutenticado();
 
         if (request.getNombre() != null) user.setNombre(request.getNombre());
