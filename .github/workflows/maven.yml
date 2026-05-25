@@ -32,8 +32,11 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: 21
-          distribution: 'temurin'
+          distribution: temurin
           cache: maven
+
+      - name: Dar permisos al wrapper
+        run: chmod +x mvnw
 
       - name: Build and test
         run: ./mvnw verify -B
