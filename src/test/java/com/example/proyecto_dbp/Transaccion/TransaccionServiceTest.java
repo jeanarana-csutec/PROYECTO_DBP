@@ -21,6 +21,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -240,15 +243,16 @@ class TransaccionServiceTest {
     void shouldGetMisCompras() {
         // Given
         when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
-        when(transaccionRepository.findByCompradorId(1L)).thenReturn(List.of(transaccion));
+        Page<Transaccion> page = new PageImpl<>(List.of(transaccion));
+        when(transaccionRepository.findByCompradorId(any(Long.class), any(Pageable.class))).thenReturn(page);
         when(modelMapper.map(any(Transaccion.class), eq(TransaccionResponseDTO.class))).thenReturn(responseDTO);
 
         // When
-        List<TransaccionResponseDTO> compras = transaccionService.misCompras();
+        Page<TransaccionResponseDTO> compras = transaccionService.misCompras(Pageable.unpaged());
 
         // Then
         assertThat(compras).hasSize(1);
-        assertThat(compras.get(0).getCompradorNombre()).isEqualTo("Juan Perez");
+        assertThat(compras.getContent().get(0).getCompradorNombre()).isEqualTo("Juan Perez");
     }
 
     @Test
@@ -256,11 +260,12 @@ class TransaccionServiceTest {
     void shouldGetMisVentas() {
         // Given
         when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
-        when(transaccionRepository.findByVendedorId(comprador.getId())).thenReturn(List.of(transaccion));
+        Page<Transaccion> page = new PageImpl<>(List.of(transaccion));
+        when(transaccionRepository.findByVendedorId(any(Long.class), any(Pageable.class))).thenReturn(page);
         when(modelMapper.map(any(Transaccion.class), eq(TransaccionResponseDTO.class))).thenReturn(responseDTO);
 
         // When
-        List<TransaccionResponseDTO> ventas = transaccionService.misVentas();
+        Page<TransaccionResponseDTO> ventas = transaccionService.misVentas(Pageable.unpaged());
 
         // Then
         assertThat(ventas).hasSize(1);

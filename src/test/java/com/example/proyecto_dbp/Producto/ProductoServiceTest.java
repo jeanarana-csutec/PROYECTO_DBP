@@ -11,6 +11,9 @@ import com.example.proyecto_dbp.User.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -128,14 +131,15 @@ class ProductoServiceTest {
 
         Producto producto = crearProducto(user, categoria);
 
-        when(productoRepository.findAll())
-                .thenReturn(List.of(producto));
+        Page<Producto> page = new PageImpl<>(List.of(producto));
+        when(productoRepository.findAll(any(Pageable.class)))
+                .thenReturn(page);
 
-        List<ProductoResponseDTO> productos =
-                productoService.obtenerTodos();
+        Page<ProductoResponseDTO> productos =
+                productoService.obtenerTodos(Pageable.unpaged());
 
-        assertEquals(1, productos.size());
-        assertEquals("Laptop", productos.getFirst().getTitulo());
+        assertEquals(1, productos.getContent().size());
+        assertEquals("Laptop", productos.getContent().getFirst().getTitulo());
     }
 
     @Test

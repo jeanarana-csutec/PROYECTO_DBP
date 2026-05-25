@@ -10,6 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -224,7 +227,8 @@ class UserServiceTest {
         user2.setEmail("maria@test.com");
         user2.setNombre("Maria Lopez");
 
-        when(userRepository.findAll()).thenReturn(List.of(user, user2));
+        Page<User> page = new PageImpl<>(List.of(user, user2));
+        when(userRepository.findAll(any(Pageable.class))).thenReturn(page);
         when(modelMapper.map(user, UserResponse.class)).thenReturn(userResponse);
 
         UserResponse userResponse2 = new UserResponse();
@@ -232,13 +236,13 @@ class UserServiceTest {
         when(modelMapper.map(user2, UserResponse.class)).thenReturn(userResponse2);
 
         // When
-        List<UserResponse> results = userService.getTodos();
+        Page<UserResponse> results = userService.getTodos(Pageable.unpaged());
 
         // Then
         assertThat(results).hasSize(2);
-        assertThat(results.get(0).getEmail()).isEqualTo("juan@test.com");
-        assertThat(results.get(1).getEmail()).isEqualTo("maria@test.com");
-        verify(userRepository).findAll();
+        assertThat(results.getContent().get(0).getEmail()).isEqualTo("juan@test.com");
+        assertThat(results.getContent().get(1).getEmail()).isEqualTo("maria@test.com");
+        verify(userRepository).findAll(any(Pageable.class));
     }
 
     private void setupSecurityContext() {

@@ -3,11 +3,16 @@ package com.example.proyecto_dbp.User;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -30,7 +35,7 @@ public class UserController {
 
     // Actualizar mi perfil
     @PutMapping("/me")
-    public ResponseEntity<UserResponse> actualizarPerfil(@RequestBody UserUpdateRequestDTO request) {
+    public ResponseEntity<UserResponse> actualizarPerfil(@Valid @RequestBody UserUpdateRequestDTO request) {
         return ResponseEntity.ok(userService.actualizarPerfil(request));
     }
 
@@ -44,7 +49,14 @@ public class UserController {
     // Solo ADMIN puede ver todos los usuarios
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponse>> getTodos() {
-        return ResponseEntity.ok(userService.getTodos());
+    public ResponseEntity<Map<String, Object>> getTodos(@PageableDefault(size = 20) Pageable pageable) {
+        Page<UserResponse> page = userService.getTodos(pageable);
+        Map<String, Object> response = new HashMap<>();
+        response.put("content", page.getContent());
+        response.put("totalElements", page.getTotalElements());
+        response.put("totalPages", page.getTotalPages());
+        response.put("number", page.getNumber());
+        response.put("size", page.getSize());
+        return ResponseEntity.ok(response);
     }
 }

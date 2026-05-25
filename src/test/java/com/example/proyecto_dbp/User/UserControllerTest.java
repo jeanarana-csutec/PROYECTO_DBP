@@ -12,6 +12,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
@@ -119,12 +122,13 @@ class UserControllerTest {
         userResponse2.setRol(Rol.USER);
 
         List<UserResponse> users = Arrays.asList(userResponse, userResponse2);
-        when(userService.getTodos()).thenReturn(users);
+        Page<UserResponse> page = new PageImpl<>(users);
+        when(userService.getTodos(any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].email").value("juan@test.com"))
-                .andExpect(jsonPath("$[1].email").value("maria@test.com"));
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].email").value("juan@test.com"))
+                .andExpect(jsonPath("$.content[1].email").value("maria@test.com"));
     }
 }

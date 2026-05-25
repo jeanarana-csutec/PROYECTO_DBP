@@ -16,6 +16,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import java.util.Arrays;
 import java.util.List;
 
@@ -70,12 +73,13 @@ class ProductoControllerTest {
         dto2.setTitulo("Laptop");
 
         List<ProductoResponseDTO> productos = Arrays.asList(responseDTO, dto2);
-        when(productoService.obtenerTodos()).thenReturn(productos);
+        Page<ProductoResponseDTO> page = new PageImpl<>(productos);
+        when(productoService.obtenerTodos(any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/productos"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].titulo").value("Libro de cálculo"));
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].titulo").value("Libro de cálculo"));
     }
 
     @Test

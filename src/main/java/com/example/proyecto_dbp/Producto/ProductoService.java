@@ -9,6 +9,8 @@ import com.example.proyecto_dbp.User.User;
 import com.example.proyecto_dbp.User.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,10 +28,9 @@ public class ProductoService {
     private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
-    public List<ProductoResponseDTO> obtenerTodos() {
-        return productoRepository.findAll().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+    public Page<ProductoResponseDTO> obtenerTodos(Pageable pageable) {
+        return productoRepository.findAll(pageable)
+                .map(this::toResponse);
     }
 
     @Transactional(readOnly = true)

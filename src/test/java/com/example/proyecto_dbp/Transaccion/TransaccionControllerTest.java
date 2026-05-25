@@ -12,6 +12,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -120,11 +123,12 @@ class TransaccionControllerTest {
     @WithMockUser
     void shouldReturnMisCompras() throws Exception {
         List<TransaccionResponseDTO> compras = Arrays.asList(responseDTO);
-        when(transaccionService.misCompras()).thenReturn(compras);
+        Page<TransaccionResponseDTO> page = new PageImpl<>(compras);
+        when(transaccionService.misCompras(any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/transacciones/mis-compras"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.content.length()").value(1));
     }
 
     @Test
@@ -132,10 +136,11 @@ class TransaccionControllerTest {
     @WithMockUser
     void shouldReturnMisVentas() throws Exception {
         List<TransaccionResponseDTO> ventas = Arrays.asList(responseDTO);
-        when(transaccionService.misVentas()).thenReturn(ventas);
+        Page<TransaccionResponseDTO> page = new PageImpl<>(ventas);
+        when(transaccionService.misVentas(any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/transacciones/mis-ventas"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.content.length()").value(1));
     }
 }

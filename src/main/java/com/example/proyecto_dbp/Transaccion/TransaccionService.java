@@ -11,6 +11,8 @@ import com.example.proyecto_dbp.User.User;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -130,19 +132,17 @@ public class TransaccionService {
     }
 
     @Transactional(readOnly = true)
-    public List<TransaccionResponseDTO> misCompras() {
+    public Page<TransaccionResponseDTO> misCompras(Pageable pageable) {
         User usuario = securityUtils.getUsuarioAutenticado();
-        return transaccionRepository.findByCompradorId(usuario.getId()).stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return transaccionRepository.findByCompradorId(usuario.getId(), pageable)
+                .map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
-    public List<TransaccionResponseDTO> misVentas() {
+    public Page<TransaccionResponseDTO> misVentas(Pageable pageable) {
         User usuario = securityUtils.getUsuarioAutenticado();
-        return transaccionRepository.findByVendedorId(usuario.getId()).stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        return transaccionRepository.findByVendedorId(usuario.getId(), pageable)
+                .map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
