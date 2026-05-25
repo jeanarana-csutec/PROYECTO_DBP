@@ -1,4 +1,4 @@
-package com.example.proyecto_dbp.TestAllDTOs;
+package com.example.proyecto_dbp.TestDTOs;
 
 import com.example.proyecto_dbp.Auth.AuthLoginRequest;
 import com.example.proyecto_dbp.Auth.AuthLoginResponse;

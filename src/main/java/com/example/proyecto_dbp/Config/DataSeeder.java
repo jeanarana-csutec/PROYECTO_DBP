@@ -19,7 +19,7 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        if (userRepository.findByEmail("admin@mail.com").isEmpty()) {
+        if (userRepository.findByEmail("admin@gmail.com").isEmpty()) {
 
             User admin = new User();
             admin.setNombre("admin");

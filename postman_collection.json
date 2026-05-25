@@ -1,0 +1,948 @@
+{
+  "info": {
+    "name": "PROYECTO_DBP API",
+    "description": "Colección de Postman para la documentación de la API del proyecto PROYECTO_DBP. Esta API permite la gestión de productos universitarios en venta/alquiler, con autenticación JWT, favoritos, reseñas, mensajería y transacciones.\n\n## Variables de Entorno\n- `base_url`: URL base del servidor (http://localhost:8080)\n- `admin_token`: Token JWT del administrador (se obtiene al hacer login)\n- `user_token`: Token JWT de un usuario normal\n- `refresh_token`: Token de refresco\n\n## Flujo de Uso\n1. Hacer login con admin@mail.com / admin123 para obtener token ADMIN\n2. Registrar un nuevo usuario o hacer login con credenciales existentes\n3. Usar los tokens en los endpoints protegidos",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{user_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Endpoints de autenticación. Permiten registro, inicio de sesión y renovación de tokens JWT.",
+      "item": [
+        {
+          "name": "Registro de Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo.usuario@upch.pe\",\n  \"password\": \"contraseña123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "description": "Registra un nuevo usuario en el sistema. El email debe ser único. Se genera automáticamente un nombre a partir del email y se extrae la universidad del dominio. Devuelve el token JWT de acceso, refresh token y datos del usuario."
+          },
+          "response": [
+            {
+              "name": "Registro Exitoso",
+              "status": "Created",
+              "code": 201,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzM4NCJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzM4NCJ9...\",\n  \"nombre\": \"Nuevo Usuario\",\n  \"fechaRegistro\": \"2026-05-25T13:54:55.946138\",\n  \"universidad\": \"upch\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Inicio de Sesión",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Inicia sesión con credenciales existentes. Devuelve un token JWT de acceso y un refresh token. El admin por defecto es admin@gmail.com / admin123."
+          },
+          "response": [
+            {
+              "name": "Login Exitoso",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzM4NCJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzM4NCJ9...\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "refresh"]
+            },
+            "description": "Renueva el token JWT de acceso usando un refresh token válido. Útil cuando el token de acceso ha expirado sin necesidad de que el usuario vuelva a iniciar sesión."
+          },
+          "response": [
+            {
+              "name": "Refresh Exitoso",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzM4NCJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzM4NCJ9...\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "description": "Gestión de perfiles de usuario. Los usuarios pueden ver y editar su propio perfil. Los administradores pueden listar todos los usuarios.",
+      "item": [
+        {
+          "name": "Obtener Mi Perfil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "me"]
+            },
+            "description": "Obtiene el perfil del usuario autenticado. Requiere token JWT válido."
+          },
+          "response": [
+            {
+              "name": "Perfil Obtenido",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"id\": 2,\n  \"nombre\": \"Test\",\n  \"email\": \"test@upch.pe\",\n  \"universidad\": \"upch\",\n  \"fotoUrl\": null,\n  \"fechaRegistro\": \"2026-05-25T13:54:55.946138\",\n  \"rol\": \"USER\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Obtener Usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "1"]
+            },
+            "description": "Obtiene el perfil público de cualquier usuario por su ID."
+          }
+        },
+        {
+          "name": "Actualizar Mi Perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Mi Nombre Actualizado\",\n  \"fotoUrl\": \"https://ejemplo.com/foto.jpg\",\n  \"universidad\": \"upch\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "me"]
+            },
+            "description": "Actualiza el nombre, foto de perfil y/o universidad del usuario autenticado."
+          }
+        },
+        {
+          "name": "Desactivar Mi Cuenta",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "me"]
+            },
+            "description": "Desactiva la cuenta del usuario autenticado. El usuario ya no podrá iniciar sesión."
+          }
+        },
+        {
+          "name": "Listar Todos los Usuarios (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Lista todos los usuarios del sistema con paginación. Solo accesible para administradores (rol ADMIN)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categorías",
+      "description": "Gestión de categorías de productos. Las categorías permiten clasificar y organizar los productos. Los endpoints de creación, edición y eliminación requieren rol ADMIN.",
+      "item": [
+        {
+          "name": "Listar Todas las Categorías",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categorias",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categorias"]
+            },
+            "description": "Obtiene todas las categorías disponibles. No requiere autenticación."
+          },
+          "response": [
+            {
+              "name": "Categorías Obtenidas",
+              "status": "OK",
+              "code": 200,
+              "body": "[\n  {\n    \"id\": 1,\n    \"nombre\": \"Electronicos\",\n    \"descripcion\": \"Productos electronicos\"\n  },\n  {\n    \"id\": 2,\n    \"nombre\": \"Libros\",\n    \"descripcion\": \"Libros y apuntes\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Obtener Categoría por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categorias/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categorias", "1"]
+            },
+            "description": "Obtiene una categoría específica por su ID."
+          }
+        },
+        {
+          "name": "Crear Categoría (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ropa y Accesorios\",\n  \"descripcion\": \"Prendas de vestir y accesorios\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/categorias",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categorias"]
+            },
+            "description": "Crea una nueva categoría. Solo accesible para administradores."
+          }
+        },
+        {
+          "name": "Actualizar Categoría (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Electrónicos Actualizado\",\n  \"descripcion\": \"Nueva descripción\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/categorias/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categorias", "1"]
+            },
+            "description": "Actualiza una categoría existente por su ID. Solo accesible para administradores."
+          }
+        },
+        {
+          "name": "Eliminar Categoría (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/categorias/3",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "categorias", "3"]
+            },
+            "description": "Elimina una categoría por su ID. Solo accesible para administradores."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "description": "Gestión de productos. Los usuarios pueden crear, ver y filtrar productos. Los administradores pueden eliminar cualquier producto. Los productos pueden ser de tipo VENTA o ALQUILER y tener estado DISPONIBLE, RESERVADO, VENDIDO o ALQUILADO.",
+      "item": [
+        {
+          "name": "Listar Productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "productos"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Obtiene todos los productos con paginación. Devuelve información del vendedor y la categoría."
+          },
+          "response": [
+            {
+              "name": "Productos Obtenidos",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"titulo\": \"Calculadora Cientifica\",\n      \"descripcion\": \"Calculadora Casio\",\n      \"precio\": 50.0,\n      \"tipo\": \"VENTA\",\n      \"estado\": \"DISPONIBLE\",\n      \"imagenUrl\": null,\n      \"fechaPublicacion\": \"2026-05-25T13:55:21.618104\",\n      \"vendedorNombre\": \"Test\",\n      \"vendedorEmail\": \"test@upch.pe\",\n      \"categoriaNombre\": \"Electronicos\"\n    }\n  ],\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"number\": 0,\n  \"size\": 20\n}"
+            }
+          ]
+        },
+        {
+          "name": "Obtener Producto por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "productos", "1"]
+            },
+            "description": "Obtiene un producto específico por su ID."
+          }
+        },
+        {
+          "name": "Crear Producto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"iPhone 13\",\n  \"descripcion\": \"iPhone 13 en buen estado\",\n  \"precio\": 2500.00,\n  \"tipo\": \"VENTA\",\n  \"imagenUrl\": \"https://ejemplo.com/foto.jpg\",\n  \"categoriaId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "productos"]
+            },
+            "description": "Crea un nuevo producto. El usuario autenticado será el vendedor. El estado inicial es DISPONIBLE. Para alquiler usar tipo ALQUILER."
+          },
+          "response": [
+            {
+              "name": "Producto Creado",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 3,\n  \"titulo\": \"iPhone 13\",\n  \"descripcion\": \"iPhone 13 en buen estado\",\n  \"precio\": 2500.0,\n  \"tipo\": \"VENTA\",\n  \"estado\": \"DISPONIBLE\",\n  \"imagenUrl\": \"https://ejemplo.com/foto.jpg\",\n  \"fechaPublicacion\": \"2026-05-25T13:55:21.618104\",\n  \"vendedorNombre\": \"Test\",\n  \"vendedorEmail\": \"test@upch.pe\",\n  \"categoriaNombre\": \"Electronicos\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Actualizar Producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"iPhone 13 Actualizado\",\n  \"descripcion\": \"Nueva descripción\",\n  \"precio\": 2300.00,\n  \"tipo\": \"VENTA\",\n  \"imagenUrl\": \"https://ejemplo.com/nueva-foto.jpg\",\n  \"categoriaId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos/3",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "productos", "3"]
+            },
+            "description": "Actualiza un producto existente por su ID. El usuario debe ser el vendedor del producto."
+          }
+        },
+        {
+          "name": "Eliminar Producto (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos/3",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "productos", "3"]
+            },
+            "description": "Elimina un producto por su ID. Solo accesible para administradores."
+          }
+        },
+        {
+          "name": "Productos por Categoría",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos/categoria/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "productos", "categoria", "1"]
+            },
+            "description": "Filtra productos por ID de categoría."
+          }
+        },
+        {
+          "name": "Productos por Estado",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos/estado/DISPONIBLE",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "productos", "estado", "DISPONIBLE"]
+            },
+            "description": "Filtra productos por estado (DISPONIBLE, RESERVADO, VENDIDO, ALQUILADO)."
+          }
+        },
+        {
+          "name": "Productos por Tipo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/productos/tipo/VENTA",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "productos", "tipo", "VENTA"]
+            },
+            "description": "Filtra productos por tipo (VENTA, ALQUILER)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transacciones",
+      "description": "Gestión de transacciones (compras/alquileres). Los usuarios pueden crear transacciones para productos de otros usuarios. El vendedor puede completar la transacción. Ambos (comprador y vendedor) pueden cancelarla mientras esté pendiente.",
+      "item": [
+        {
+          "name": "Crear Transacción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productoId\": 1,\n  \"tipo\": \"COMPRA\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/transacciones",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transacciones"]
+            },
+            "description": "Crea una nueva transacción. El usuario autenticado será el comprador. El producto debe estar disponible y no puede ser propio. Para alquiler incluir fechaFin."
+          },
+          "response": [
+            {
+              "name": "Transacción Creada",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"tipo\": \"COMPRA\",\n  \"estado\": \"PENDIENTE\",\n  \"monto\": 50.0,\n  \"fechaInicio\": \"2026-05-25T13:55:33.547588\",\n  \"fechaFin\": null,\n  \"compradorNombre\": \"Test\",\n  \"vendedorNombre\": \"User2\",\n  \"productoTitulo\": \"Calculadora Cientifica\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Obtener Transacción por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transacciones/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transacciones", "1"]
+            },
+            "description": "Obtiene los detalles de una transacción por su ID."
+          }
+        },
+        {
+          "name": "Completar Transacción (Vendedor)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transacciones/1/completar",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transacciones", "1", "completar"]
+            },
+            "description": "Completa una transacción pendiente. Solo el vendedor puede completarla. Marca el producto como VENDIDO (o ALQUILADO si es alquiler). Dispara un evento de notificación."
+          }
+        },
+        {
+          "name": "Cancelar Transacción",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transacciones/1/cancelar",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transacciones", "1", "cancelar"]
+            },
+            "description": "Cancela una transacción pendiente. Tanto el comprador como el vendedor pueden cancelarla. El producto vuelve a estar DISPONIBLE."
+          }
+        },
+        {
+          "name": "Mis Compras",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transacciones/mis-compras?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transacciones", "mis-compras"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Obtiene todas las transacciones donde el usuario autenticado es el comprador, con paginación."
+          }
+        },
+        {
+          "name": "Mis Ventas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/transacciones/mis-ventas?page=0&size=20",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "transacciones", "mis-ventas"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Obtiene todas las transacciones donde el usuario autenticado es el vendedor, con paginación."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Favoritos",
+      "description": "Gestión de productos favoritos. Los usuarios pueden guardar productos como favoritos para acceder rápidamente a ellos. No se puede marcar el propio producto como favorito.",
+      "item": [
+        {
+          "name": "Agregar a Favoritos",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/favoritos/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "favoritos", "1"]
+            },
+            "description": "Agrega un producto a la lista de favoritos del usuario autenticado. No se puede agregar un producto propio ni uno ya existente en favoritos."
+          },
+          "response": [
+            {
+              "name": "Favorito Agregado",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"productoId\": 1,\n  \"productoTitulo\": \"Calculadora Cientifica\",\n  \"productoPrecio\": 50.0,\n  \"fechaAgregado\": \"2026-05-25T13:55:45.616818\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Listar Mis Favoritos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/favoritos",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "favoritos"]
+            },
+            "description": "Obtiene todos los productos favoritos del usuario autenticado."
+          }
+        },
+        {
+          "name": "Eliminar de Favoritos",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/favoritos/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "favoritos", "1"]
+            },
+            "description": "Elimina un producto de la lista de favoritos del usuario autenticado."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reseñas",
+      "description": "Gestión de reseñas. Los usuarios pueden dejar reseñas (puntuación 1-5) sobre transacciones completadas. Los administradores pueden eliminar cualquier reseña.",
+      "item": [
+        {
+          "name": "Crear Reseña",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"puntuacion\": 5,\n  \"comentario\": \"Excelente producto, muy recomendado\",\n  \"transaccionId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/resenas",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "resenas"]
+            },
+            "description": "Crea una reseña para una transacción completada. La puntuación debe estar entre 1 y 5."
+          },
+          "response": [
+            {
+              "name": "Reseña Creada",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"puntuacion\": 5,\n  \"comentario\": \"Excelente producto, muy recomendado\",\n  \"fecha\": \"2026-05-25T13:55:51.355652\",\n  \"autorNombre\": \"Test\",\n  \"productoTitulo\": \"Calculadora Cientifica\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Obtener Reseña por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/resenas/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "resenas", "1"]
+            },
+            "description": "Obtiene una reseña específica por su ID."
+          }
+        },
+        {
+          "name": "Obtener Reseña por Transacción",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/resenas/transaccion/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "resenas", "transaccion", "1"]
+            },
+            "description": "Obtiene la reseña asociada a una transacción específica."
+          }
+        },
+        {
+          "name": "Obtener Reseñas por Autor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/resenas/autor/2",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "resenas", "autor", "2"]
+            },
+            "description": "Obtiene todas las reseñas escritas por un usuario específico."
+          }
+        },
+        {
+          "name": "Eliminar Reseña (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/resenas/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "resenas", "1"]
+            },
+            "description": "Elimina una reseña por su ID. Solo accesible para administradores."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mensajes",
+      "description": "Sistema de mensajería entre usuarios sobre productos. Los usuarios pueden enviar mensajes sobre productos, ver conversaciones y marcar mensajes como leídos.",
+      "item": [
+        {
+          "name": "Enviar Mensaje",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contenido\": \"Hola, me interesa tu producto. ¿Sigue disponible?\",\n  \"receptorId\": 3,\n  \"productoId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/mensajes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "mensajes"]
+            },
+            "description": "Envía un mensaje a otro usuario sobre un producto específico. No puedes enviarte mensajes a ti mismo."
+          },
+          "response": [
+            {
+              "name": "Mensaje Enviado",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"id\": 1,\n  \"contenido\": \"Hola, me interesa tu producto. ¿Sigue disponible?\",\n  \"fechaEnvio\": \"2026-05-25T13:56:02.04023\",\n  \"leido\": false,\n  \"emisorNombre\": \"Test\",\n  \"receptorNombre\": \"User2\",\n  \"productoTitulo\": \"Calculadora Cientifica\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Obtener Conversación",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/mensajes/producto/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "mensajes", "producto", "1"]
+            },
+            "description": "Obtiene todos los mensajes asociados a un producto donde el usuario autenticado es emisor o receptor. Filtra para mostrar solo la conversación relevante."
+          }
+        },
+        {
+          "name": "Marcar Mensaje como Leído",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/mensajes/1/leido",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "mensajes", "1", "leido"]
+            },
+            "description": "Marca un mensaje como leído. Solo el receptor del mensaje puede marcarlo como leído."
+          }
+        },
+        {
+          "name": "Eliminar Mensaje (Admin)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/mensajes/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "mensajes", "1"]
+            },
+            "description": "Elimina un mensaje por su ID. Solo accesible para administradores."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Imágenes",
+      "description": "Subida de imágenes a Cloudinary. Permite subir imágenes para los productos.",
+      "item": [
+        {
+          "name": "Subir Imagen",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/imagenes/upload",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "imagenes", "upload"]
+            },
+            "description": "Sube una imagen a Cloudinary y devuelve la URL pública. Acepta un archivo multipart (form-data) con key 'file'."
+          },
+          "response": [
+            {
+              "name": "Imagen Subida",
+              "status": "Created",
+              "code": 201,
+              "body": "{\n  \"url\": \"https://res.cloudinary.com/dbinsiaoo/image/upload/v1234567890/ejemplo.jpg\"\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
