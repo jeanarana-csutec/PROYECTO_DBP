@@ -2,14 +2,13 @@
 package com.example.proyecto_dbp.Resena;
 
 import com.example.proyecto_dbp.Exceptions.*;
+import com.example.proyecto_dbp.Security.SecurityUtils;
 import com.example.proyecto_dbp.Transaccion.EstadoTransaccion;
 import com.example.proyecto_dbp.Transaccion.Transaccion;
 import com.example.proyecto_dbp.Transaccion.TransaccionRepository;
 import com.example.proyecto_dbp.User.User;
-import com.example.proyecto_dbp.User.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,18 +22,12 @@ public class ResenaService {
 
     private final ResenaRepository resenaRepository;
     private final TransaccionRepository transaccionRepository;
-    private final UserRepository userRepository;
+    private final SecurityUtils securityUtils;
     private final ModelMapper modelMapper;
-
-    private User getUsuarioAutenticado() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFound("Usuario no encontrado"));
-    }
 
     @Transactional
     public ResenaResponseDTO crear(ResenaRequestDTO request) {
-        User autor = getUsuarioAutenticado();
+        User autor = securityUtils.getUsuarioAutenticado();
 
         Transaccion transaccion = transaccionRepository.findById(request.getTransaccionId())
                 .orElseThrow(() -> new ResourceNotFound("Transacción no encontrada con id: " + request.getTransaccionId()));
@@ -90,7 +83,7 @@ public class ResenaService {
         Resena resena = resenaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("Reseña no encontrada con id: " + id));
 
-        User usuarioAutenticado = getUsuarioAutenticado();
+        User usuarioAutenticado = securityUtils.getUsuarioAutenticado();
 
         // Solo el autor o un admin pueden eliminar
         if (!resena.getAutor().getId().equals(usuarioAutenticado.getId())

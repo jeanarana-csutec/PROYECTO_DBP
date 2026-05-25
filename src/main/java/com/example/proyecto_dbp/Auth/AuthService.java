@@ -1,6 +1,8 @@
 package com.example.proyecto_dbp.Auth;
 
 import com.example.proyecto_dbp.Events.UsuarioRegistradoEvent;
+import com.example.proyecto_dbp.Exceptions.InvalidOperation;
+import com.example.proyecto_dbp.Exceptions.ResourceNotFound;
 import com.example.proyecto_dbp.Exceptions.UserAlreadyExists;
 import com.example.proyecto_dbp.Security.JwtService;
 import com.example.proyecto_dbp.User.Rol;
@@ -44,18 +46,21 @@ public class AuthService {
 
         AuthResponse response = modelMapper.map(user, AuthResponse.class);
         response.setToken(jwtService.generateToken(user));
+        response.setRefreshToken(jwtService.generateRefreshToken(user));
         return response;
     }
 
     public AuthLoginResponse login(AuthLoginRequest rq) {
         User user = userRepository.findByEmail(rq.getEmail())
-                .orElseThrow(() -> new RuntimeException("No existe el usuario"));
+                .orElseThrow(() -> new ResourceNotFound("No existe el usuario"));
 
         if (!passwordEncoder.matches(rq.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Password incorrecta");
         }
 
-        return new AuthLoginResponse(jwtService.generateToken(user));
+        String accessToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+        return new AuthLoginResponse(accessToken, refreshToken);
     }
 
     public String obtenerUniversidad(String email) {
@@ -71,6 +76,18 @@ public class AuthService {
             return capitalize(datos[0]) + " " + capitalize(datos[1]);
         }
         return capitalize(datos[0]);
+    }
+
+    public AuthLoginResponse refresh(String refreshToken) {
+        if (!jwtService.isTokenValid(refreshToken)) {
+            throw new InvalidOperation("Token de refresco inválido o expirado");
+        }
+        String email = jwtService.extractUsername(refreshToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFound("Usuario no encontrado"));
+        String newAccessToken = jwtService.generateToken(user);
+        String newRefreshToken = jwtService.generateRefreshToken(user);
+        return new AuthLoginResponse(newAccessToken, newRefreshToken);
     }
 
     private String capitalize(String str) {

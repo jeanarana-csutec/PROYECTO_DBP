@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import jakarta.persistence.PrePersist;
+
 @Entity
 @Getter
 @Setter
@@ -39,6 +41,13 @@ public class User implements UserDetails {
     private LocalDateTime fechaRegistro;
     private Boolean activo = true;
 
+    @PrePersist
+    protected void onCreate() {
+        if (fechaRegistro == null) {
+            fechaRegistro = LocalDateTime.now();
+        }
+    }
+
     // Un usuario publica muchos productos
     @OneToMany(mappedBy = "vendedor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Producto> productos = new ArrayList<>();
@@ -48,14 +57,6 @@ public class User implements UserDetails {
     // Un usuario recibe muchas transacciones como vendedor
     @OneToMany(mappedBy = "vendedor", cascade = CascadeType.ALL)
     private List<Transaccion> ventas = new ArrayList<>();
-    // Favoritos (ManyToMany)
-    @ManyToMany
-    @JoinTable(
-            name = "favoritos",
-            joinColumns = @JoinColumn(name = "usuario_id"),
-            inverseJoinColumns = @JoinColumn(name = "producto_id")
-    )
-    private List<Producto> favoritos = new ArrayList<>();
     @OneToMany(mappedBy = "emisor")
     private List<Mensaje> mensajesEnviados = new ArrayList<>();
     @OneToMany(mappedBy = "receptor")

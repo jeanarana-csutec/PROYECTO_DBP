@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.PrePersist;
+
 @Entity
 @Table(name = "productos")
 @Getter
@@ -40,6 +42,13 @@ public class Producto {
 
     private String imagenUrl;
     private LocalDateTime fechaPublicacion;
+
+    @PrePersist
+    protected void onCreate() {
+        if (fechaPublicacion == null) {
+            fechaPublicacion = LocalDateTime.now();
+        }
+    }
 
     // Muchos productos pertenecen a un vendedor
     @ManyToOne

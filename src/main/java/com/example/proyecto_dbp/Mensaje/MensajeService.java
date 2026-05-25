@@ -5,12 +5,12 @@ import com.example.proyecto_dbp.Events.NuevoMensajeEvent;
 import com.example.proyecto_dbp.Exceptions.*;
 import com.example.proyecto_dbp.Producto.Producto;
 import com.example.proyecto_dbp.Producto.ProductoRepository;
+import com.example.proyecto_dbp.Security.SecurityUtils;
 import com.example.proyecto_dbp.User.User;
 import com.example.proyecto_dbp.User.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,19 +24,14 @@ public class MensajeService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final MensajeRepository mensajeRepository;
+    private final SecurityUtils securityUtils;
     private final UserRepository userRepository;
     private final ProductoRepository productoRepository;
     private final ModelMapper modelMapper;
 
-    private User getUsuarioAutenticado() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFound("Usuario no encontrado"));
-    }
-
     @Transactional
     public MensajeResponseDTO enviar(MensajeRequestDTO request) {
-        User emisor = getUsuarioAutenticado();
+        User emisor = securityUtils.getUsuarioAutenticado();
 
         User receptor = userRepository.findById(request.getReceptorId())
                 .orElseThrow(() -> new ResourceNotFound("Receptor no encontrado con id: " + request.getReceptorId()));
@@ -66,7 +61,7 @@ public class MensajeService {
 
     @Transactional(readOnly = true)
     public List<MensajeResponseDTO> conversacion(Long productoId) {
-        User usuario = getUsuarioAutenticado();
+        User usuario = securityUtils.getUsuarioAutenticado();
         return mensajeRepository.findByProductoId(productoId).stream()
                 .filter(m -> m.getEmisor().getId().equals(usuario.getId())
                         || m.getReceptor().getId().equals(usuario.getId()))
@@ -79,7 +74,7 @@ public class MensajeService {
         Mensaje mensaje = mensajeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("Mensaje no encontrado con id: " + id));
 
-        User usuarioAutenticado = getUsuarioAutenticado();
+        User usuarioAutenticado = securityUtils.getUsuarioAutenticado();
 
         // Solo el receptor puede marcar como leído
         if (!mensaje.getReceptor().getId().equals(usuarioAutenticado.getId())) {
@@ -95,7 +90,7 @@ public class MensajeService {
         Mensaje mensaje = mensajeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("Mensaje no encontrado con id: " + id));
 
-        User usuarioAutenticado = getUsuarioAutenticado();
+        User usuarioAutenticado = securityUtils.getUsuarioAutenticado();
 
         // Solo el emisor puede eliminar su mensaje
         if (!mensaje.getEmisor().getId().equals(usuarioAutenticado.getId())) {

@@ -10,7 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.security.Key;
 import java.util.Date;
 
 @Component
@@ -28,11 +27,19 @@ public class JwtService {
 
 
 
-    private Key getSigningKey() {
+    private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public String generateToken(UserDetails userDetails) {
+        return buildToken(userDetails, accessTokenExpiration);
+    }
+
+    public String generateRefreshToken(UserDetails userDetails) {
+        return buildToken(userDetails, refreshTokenExpiration);
+    }
+
+    private String buildToken(UserDetails userDetails, long expiration) {
         Date now = new Date();
         return Jwts.builder()
                 .subject(userDetails.getUsername())
@@ -40,7 +47,7 @@ public class JwtService {
                         userDetails.getAuthorities().stream()
                                 .map(GrantedAuthority::getAuthority).toList())
                 .issuedAt(now)
-                .expiration(new Date(now.getTime() + accessTokenExpiration))
+                .expiration(new Date(now.getTime() + expiration))
                 .signWith(getSigningKey())
                 .compact();
     }

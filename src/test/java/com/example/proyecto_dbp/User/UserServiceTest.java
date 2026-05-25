@@ -1,6 +1,7 @@
 package com.example.proyecto_dbp.User;
 
 import com.example.proyecto_dbp.Exceptions.ResourceNotFound;
+import com.example.proyecto_dbp.Security.SecurityUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,9 @@ class UserServiceTest {
 
     @Mock
     private ModelMapper modelMapper;
+
+    @Mock
+    private SecurityUtils securityUtils;
 
     @Mock
     private SecurityContext securityContext;
@@ -105,8 +109,7 @@ class UserServiceTest {
     @DisplayName("should get current user profile when authenticated")
     void shouldGetMiPerfilWhenUserAuthenticated() {
         // Given
-        setupSecurityContext();
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(user));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(user);
         when(modelMapper.map(user, UserResponse.class)).thenReturn(userResponse);
 
         // When
@@ -116,15 +119,13 @@ class UserServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getEmail()).isEqualTo("juan@test.com");
         assertThat(result.getNombre()).isEqualTo("Juan Perez");
-        verify(userRepository).findByEmail("juan@test.com");
     }
 
     @Test
     @DisplayName("should throw ResourceNotFound when getting profile of non-existent user")
     void shouldThrowResourceNotFoundWhenUserNotExistsInGetMiPerfil() {
         // Given
-        setupSecurityContext();
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.empty());
+        when(securityUtils.getUsuarioAutenticado()).thenThrow(new ResourceNotFound("Usuario no encontrado"));
 
         // When/Then
         assertThatThrownBy(() -> userService.getMiPerfil())
@@ -164,8 +165,7 @@ class UserServiceTest {
     @DisplayName("should update profile when valid data provided")
     void shouldActualizarPerfilWhenValidData() {
         // Given
-        setupSecurityContext();
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(user));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(user);
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(modelMapper.map(user, UserResponse.class)).thenReturn(userResponse);
 
@@ -184,8 +184,7 @@ class UserServiceTest {
     @DisplayName("should only update non-null fields in profile")
     void shouldOnlyUpdateNonNullFields() {
         // Given
-        setupSecurityContext();
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(user));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(user);
         when(userRepository.save(any(User.class))).thenReturn(user);
         when(modelMapper.map(user, UserResponse.class)).thenReturn(userResponse);
 
@@ -205,8 +204,7 @@ class UserServiceTest {
     @DisplayName("should deactivate account when user authenticated")
     void shouldDesactivarCuentaWhenUserAuthenticated() {
         // Given
-        setupSecurityContext();
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(user));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(user);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         // When

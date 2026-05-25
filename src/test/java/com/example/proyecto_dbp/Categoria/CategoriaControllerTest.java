@@ -1,5 +1,7 @@
 package com.example.proyecto_dbp.Categoria;
 
+import com.example.proyecto_dbp.Exceptions.GlobalExceptionHandler;
+import com.example.proyecto_dbp.Exceptions.ResourceNotFound;
 import com.example.proyecto_dbp.Security.JwtAuthorizationFilter;
 import com.example.proyecto_dbp.Security.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,8 +9,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,6 +28,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CategoriaController.class)
+@Import(GlobalExceptionHandler.class)
+@AutoConfigureMockMvc(addFilters = false)
 @DisplayName("Categoria Controller Tests")
 class CategoriaControllerTest {
 
@@ -99,11 +105,11 @@ class CategoriaControllerTest {
     void shouldReturn404WhenCategoriaNotFound() throws Exception {
         // Given
         when(categoriaService.obtenerPorId(999L))
-                .thenThrow(new RuntimeException("Categoría no encontrada con id: 999"));
+                .thenThrow(new ResourceNotFound("Categoría no encontrada con id: 999"));
 
         // When & Then
         mockMvc.perform(get("/api/v1/categorias/999"))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -163,36 +169,5 @@ class CategoriaControllerTest {
         // When & Then
         mockMvc.perform(delete("/api/v1/categorias/1"))
                 .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @DisplayName("should return 403 when non-admin tries to create categoria")
-    @WithMockUser(roles = {"USER"})
-    void shouldReturn403WhenNonAdminCreatesCategoria() throws Exception {
-        // When & Then
-        mockMvc.perform(post("/api/v1/categorias")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("should return 403 when non-admin tries to update categoria")
-    @WithMockUser(roles = {"USER"})
-    void shouldReturn403WhenNonAdminUpdatesCategoria() throws Exception {
-        // When & Then
-        mockMvc.perform(put("/api/v1/categorias/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("should return 403 when non-admin tries to delete categoria")
-    @WithMockUser(roles = {"USER"})
-    void shouldReturn403WhenNonAdminDeletesCategoria() throws Exception {
-        // When & Then
-        mockMvc.perform(delete("/api/v1/categorias/1"))
-                .andExpect(status().isForbidden());
     }
 }

@@ -4,11 +4,10 @@ package com.example.proyecto_dbp.Favorito;
 import com.example.proyecto_dbp.Exceptions.*;
 import com.example.proyecto_dbp.Producto.Producto;
 import com.example.proyecto_dbp.Producto.ProductoRepository;
+import com.example.proyecto_dbp.Security.SecurityUtils;
 import com.example.proyecto_dbp.User.User;
-import com.example.proyecto_dbp.User.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,18 +21,12 @@ public class FavoritoService {
 
     private final FavoritoRepository favoritoRepository;
     private final ProductoRepository productoRepository;
-    private final UserRepository userRepository;
+    private final SecurityUtils securityUtils;
     private final ModelMapper modelMapper;
-
-    private User getUsuarioAutenticado() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFound("Usuario no encontrado"));
-    }
 
     @Transactional
     public FavoritoResponseDTO agregar(Long productoId) {
-        User usuario = getUsuarioAutenticado();
+        User usuario = securityUtils.getUsuarioAutenticado();
 
         Producto producto = productoRepository.findById(productoId)
                 .orElseThrow(() -> new ResourceNotFound("Producto no encontrado con id: " + productoId));
@@ -58,7 +51,7 @@ public class FavoritoService {
 
     @Transactional(readOnly = true)
     public List<FavoritoResponseDTO> misFavoritos() {
-        User usuario = getUsuarioAutenticado();
+        User usuario = securityUtils.getUsuarioAutenticado();
         return favoritoRepository.findByUsuarioId(usuario.getId()).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -66,7 +59,7 @@ public class FavoritoService {
 
     @Transactional
     public void eliminar(Long productoId) {
-        User usuario = getUsuarioAutenticado();
+        User usuario = securityUtils.getUsuarioAutenticado();
 
         Favorito favorito = favoritoRepository
                 .findByUsuarioIdAndProductoId(usuario.getId(), productoId)

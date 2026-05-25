@@ -4,11 +4,11 @@ import com.example.proyecto_dbp.Categoria.Categoria;
 import com.example.proyecto_dbp.Categoria.CategoriaRepository;
 import com.example.proyecto_dbp.Exceptions.ResourceNotFound;
 import com.example.proyecto_dbp.Exceptions.Forbidden;
+import com.example.proyecto_dbp.Security.SecurityUtils;
 import com.example.proyecto_dbp.User.User;
 import com.example.proyecto_dbp.User.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,14 +23,7 @@ public class ProductoService {
     private final ModelMapper modelMapper;
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
-    private final UserRepository userRepository;
-
-    // Método auxiliar para obtener el usuario autenticado desde el token
-    private User getUsuarioAutenticado() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFound("Usuario no encontrado"));
-    }
+    private final SecurityUtils securityUtils;
 
     @Transactional(readOnly = true)
     public List<ProductoResponseDTO> obtenerTodos() {
@@ -48,7 +41,7 @@ public class ProductoService {
 
     @Transactional
     public ProductoResponseDTO crearProducto(ProductoRequestDTO request) {
-        User vendedor = getUsuarioAutenticado();
+        User vendedor = securityUtils.getUsuarioAutenticado();
 
         Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
                 .orElseThrow(() -> new ResourceNotFound("Categoría no encontrada con id: " + request.getCategoriaId()));
@@ -72,7 +65,7 @@ public class ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("Producto no encontrado con id: " + id));
 
-        User usuarioAutenticado = getUsuarioAutenticado();
+        User usuarioAutenticado = securityUtils.getUsuarioAutenticado();
 
         // Solo el vendedor dueño puede editar
         if (!producto.getVendedor().getId().equals(usuarioAutenticado.getId())) {
@@ -102,7 +95,7 @@ public class ProductoService {
         Producto producto = productoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("Producto no encontrado con id: " + id));
 
-        User usuarioAutenticado = getUsuarioAutenticado();
+        User usuarioAutenticado = securityUtils.getUsuarioAutenticado();
 
         // Solo el dueño o un ADMIN puede eliminar
         if (!producto.getVendedor().getId().equals(usuarioAutenticado.getId())

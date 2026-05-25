@@ -4,15 +4,13 @@ import com.example.proyecto_dbp.Categoria.Categoria;
 import com.example.proyecto_dbp.Categoria.CategoriaRepository;
 import com.example.proyecto_dbp.Exceptions.Forbidden;
 import com.example.proyecto_dbp.Exceptions.ResourceNotFound;
+import com.example.proyecto_dbp.Security.SecurityUtils;
 import com.example.proyecto_dbp.User.Rol;
 import com.example.proyecto_dbp.User.User;
 import com.example.proyecto_dbp.User.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +21,7 @@ class ProductoServiceTest {
 
     private ProductoRepository productoRepository;
     private CategoriaRepository categoriaRepository;
-    private UserRepository userRepository;
+    private SecurityUtils securityUtils;
     private ModelMapper modelMapper;
 
     private ProductoService productoService;
@@ -32,14 +30,14 @@ class ProductoServiceTest {
     void setUp() {
         productoRepository = mock(ProductoRepository.class);
         categoriaRepository = mock(CategoriaRepository.class);
-        userRepository = mock(UserRepository.class);
+        securityUtils = mock(SecurityUtils.class);
         modelMapper = new ModelMapper();
 
         productoService = new ProductoService(
                 modelMapper,
                 productoRepository,
                 categoriaRepository,
-                userRepository
+                securityUtils
         );
     }
 
@@ -85,15 +83,7 @@ class ProductoServiceTest {
         request.setTipo(TipoProducto.VENTA);
         request.setCategoriaId(1L);
 
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),
-                        null
-                )
-        );
-
-        when(userRepository.findByEmail(user.getEmail()))
-                .thenReturn(Optional.of(user));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(user);
 
         when(categoriaRepository.findById(1L))
                 .thenReturn(Optional.of(categoria));
@@ -119,15 +109,7 @@ class ProductoServiceTest {
         ProductoRequestDTO request = new ProductoRequestDTO();
         request.setCategoriaId(99L);
 
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),
-                        null
-                )
-        );
-
-        when(userRepository.findByEmail(user.getEmail()))
-                .thenReturn(Optional.of(user));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(user);
 
         when(categoriaRepository.findById(99L))
                 .thenReturn(Optional.empty());
@@ -193,15 +175,7 @@ class ProductoServiceTest {
 
         Producto producto = crearProducto(user, categoria);
 
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        user.getEmail(),
-                        null
-                )
-        );
-
-        when(userRepository.findByEmail(user.getEmail()))
-                .thenReturn(Optional.of(user));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(user);
 
         when(productoRepository.findById(1L))
                 .thenReturn(Optional.of(producto));
@@ -227,15 +201,7 @@ class ProductoServiceTest {
         Producto producto =
                 crearProducto(owner, categoria);
 
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        anotherUser.getEmail(),
-                        null
-                )
-        );
-
-        when(userRepository.findByEmail(anotherUser.getEmail()))
-                .thenReturn(Optional.of(anotherUser));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(anotherUser);
 
         when(productoRepository.findById(1L))
                 .thenReturn(Optional.of(producto));

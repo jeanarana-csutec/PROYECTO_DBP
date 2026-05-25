@@ -11,6 +11,8 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.PrePersist;
+
 @Entity
 @Table(name = "resenas")
 @Getter
@@ -26,6 +28,13 @@ public class Resena {
 
     private String comentario;
     private LocalDateTime fecha;
+
+    @PrePersist
+    protected void onCreate() {
+        if (fecha == null) {
+            fecha = LocalDateTime.now();
+        }
+    }
 
     // Una reseña pertenece a una sola transacción (y solo puede haber una)
     @OneToOne

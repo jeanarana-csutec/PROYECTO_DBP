@@ -9,6 +9,8 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.PrePersist;
+
 @Entity
 @Getter
 @Setter
@@ -24,6 +26,13 @@ public class Mensaje {
 
     private LocalDateTime fechaEnvio;
     private Boolean leido = false;
+
+    @PrePersist
+    protected void onCreate() {
+        if (fechaEnvio == null) {
+            fechaEnvio = LocalDateTime.now();
+        }
+    }
 
     // Muchos mensajes tienen un emisor
     @ManyToOne

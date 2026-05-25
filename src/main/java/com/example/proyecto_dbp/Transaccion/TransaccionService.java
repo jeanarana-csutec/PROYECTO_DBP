@@ -6,12 +6,11 @@ import com.example.proyecto_dbp.Exceptions.*;
 import com.example.proyecto_dbp.Producto.EstadoProducto;
 import com.example.proyecto_dbp.Producto.Producto;
 import com.example.proyecto_dbp.Producto.ProductoRepository;
+import com.example.proyecto_dbp.Security.SecurityUtils;
 import com.example.proyecto_dbp.User.User;
-import com.example.proyecto_dbp.User.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,18 +25,12 @@ public class TransaccionService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final TransaccionRepository transaccionRepository;
     private final ProductoRepository productoRepository;
-    private final UserRepository userRepository;
+    private final SecurityUtils securityUtils;
     private final ModelMapper modelMapper;
-
-    private User getUsuarioAutenticado() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFound("Usuario no encontrado"));
-    }
 
     @Transactional
     public TransaccionResponseDTO crear(TransaccionRequestDTO request) {
-        User comprador = getUsuarioAutenticado();
+        User comprador = securityUtils.getUsuarioAutenticado();
 
         Producto producto = productoRepository.findById(request.getProductoId())
                 .orElseThrow(() -> new ResourceNotFound("Producto no encontrado con id: " + request.getProductoId()));
@@ -83,7 +76,7 @@ public class TransaccionService {
         Transaccion transaccion = transaccionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("Transacción no encontrada con id: " + id));
 
-        User usuarioAutenticado = getUsuarioAutenticado();
+        User usuarioAutenticado = securityUtils.getUsuarioAutenticado();
 
         // Solo el vendedor puede completar
         if (!transaccion.getVendedor().getId().equals(usuarioAutenticado.getId())) {
@@ -112,7 +105,7 @@ public class TransaccionService {
         Transaccion transaccion = transaccionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("Transacción no encontrada con id: " + id));
 
-        User usuarioAutenticado = getUsuarioAutenticado();
+        User usuarioAutenticado = securityUtils.getUsuarioAutenticado();
 
         // Solo comprador o vendedor pueden cancelar
         boolean esComprador = transaccion.getComprador().getId().equals(usuarioAutenticado.getId());
@@ -138,7 +131,7 @@ public class TransaccionService {
 
     @Transactional(readOnly = true)
     public List<TransaccionResponseDTO> misCompras() {
-        User usuario = getUsuarioAutenticado();
+        User usuario = securityUtils.getUsuarioAutenticado();
         return transaccionRepository.findByCompradorId(usuario.getId()).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -146,7 +139,7 @@ public class TransaccionService {
 
     @Transactional(readOnly = true)
     public List<TransaccionResponseDTO> misVentas() {
-        User usuario = getUsuarioAutenticado();
+        User usuario = securityUtils.getUsuarioAutenticado();
         return transaccionRepository.findByVendedorId(usuario.getId()).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());

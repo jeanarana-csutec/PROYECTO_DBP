@@ -2,9 +2,9 @@
 package com.example.proyecto_dbp.User;
 
 import com.example.proyecto_dbp.Exceptions.*;
+import com.example.proyecto_dbp.Security.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,6 +20,7 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final SecurityUtils securityUtils;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -27,15 +28,9 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado: " + email));
     }
 
-    private User getUsuarioAutenticado() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFound("Usuario no encontrado"));
-    }
-
     @Transactional(readOnly = true)
     public UserResponse getMiPerfil() {
-        return modelMapper.map(getUsuarioAutenticado(), UserResponse.class);
+        return modelMapper.map(securityUtils.getUsuarioAutenticado(), UserResponse.class);
     }
 
     @Transactional(readOnly = true)
@@ -47,7 +42,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public UserResponse actualizarPerfil(UserUpdateRequestDTO request) {
-        User user = getUsuarioAutenticado();
+        User user = securityUtils.getUsuarioAutenticado();
 
         if (request.getNombre() != null) user.setNombre(request.getNombre());
         if (request.getFotoUrl() != null) user.setFotoUrl(request.getFotoUrl());
@@ -58,7 +53,7 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void desactivarCuenta() {
-        User user = getUsuarioAutenticado();
+        User user = securityUtils.getUsuarioAutenticado();
         user.setActivo(false);
         userRepository.save(user);
     }

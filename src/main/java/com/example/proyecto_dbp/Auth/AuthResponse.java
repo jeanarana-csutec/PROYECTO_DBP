@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AuthResponse {
     private String token;
+    private String refreshToken;
     private String nombre;
     private LocalDateTime fechaRegistro;
     private String universidad;

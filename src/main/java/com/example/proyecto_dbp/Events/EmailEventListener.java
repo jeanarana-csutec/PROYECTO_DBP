@@ -2,7 +2,6 @@
 package com.example.proyecto_dbp.Events;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -15,7 +14,7 @@ public class EmailEventListener {
     private final EmailService emailService;
 
     @Async
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onUsuarioRegistrado(UsuarioRegistradoEvent event) {
         emailService.enviarEmailBienvenida(
                 event.getUser().getEmail(),
@@ -34,7 +33,7 @@ public class EmailEventListener {
     }
 
     @Async
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onNuevoMensaje(NuevoMensajeEvent event) {
         emailService.enviarEmailNuevoMensaje(
                 event.getMensaje().getReceptor().getEmail(),

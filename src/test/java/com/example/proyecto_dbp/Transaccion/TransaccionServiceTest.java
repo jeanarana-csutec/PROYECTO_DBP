@@ -9,9 +9,9 @@ import com.example.proyecto_dbp.Producto.EstadoProducto;
 import com.example.proyecto_dbp.Producto.Producto;
 import com.example.proyecto_dbp.Producto.ProductoRepository;
 import com.example.proyecto_dbp.Producto.TipoProducto;
+import com.example.proyecto_dbp.Security.SecurityUtils;
 import com.example.proyecto_dbp.User.Rol;
 import com.example.proyecto_dbp.User.User;
-import com.example.proyecto_dbp.User.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,9 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,19 +42,13 @@ class TransaccionServiceTest {
     private ProductoRepository productoRepository;
 
     @Mock
-    private UserRepository userRepository;
+    private SecurityUtils securityUtils;
 
     @Mock
     private ModelMapper modelMapper;
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
-
-    @Mock
-    private SecurityContext securityContext;
-
-    @Mock
-    private Authentication authentication;
 
     @InjectMocks
     private TransaccionService transaccionService;
@@ -114,20 +105,18 @@ class TransaccionServiceTest {
         responseDTO.setVendedorNombre("Maria Lopez");
         responseDTO.setProductoTitulo("iPhone 14");
 
-        setupSecurityContext();
+        setupSecurityUtils();
     }
 
-    private void setupSecurityContext() {
-        when(securityContext.getAuthentication()).thenReturn(authentication);
-        when(authentication.getName()).thenReturn("juan@test.com");
-        SecurityContextHolder.setContext(securityContext);
+    private void setupSecurityUtils() {
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
     }
 
     @Test
     @DisplayName("should create transaccion when valid data")
     void shouldCreateTransaccionWhenValidData() throws Exception {
         // Given
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(comprador));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
         when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
         when(transaccionRepository.save(any(Transaccion.class))).thenReturn(transaccion);
         when(modelMapper.map(any(Transaccion.class), eq(TransaccionResponseDTO.class))).thenReturn(responseDTO);
@@ -147,7 +136,7 @@ class TransaccionServiceTest {
     void shouldThrowExceptionWhenBuyingOwnProduct() {
         // Given
         producto.setVendedor(comprador); // Mismo vendedor que comprador
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(comprador));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
         when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
 
         // When/Then
@@ -161,7 +150,7 @@ class TransaccionServiceTest {
     void shouldThrowExceptionWhenProductoNotAvailable() {
         // Given
         producto.setEstado(EstadoProducto.VENDIDO);
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(comprador));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
         when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
 
         // When/Then
@@ -176,7 +165,7 @@ class TransaccionServiceTest {
         // Given
         requestDTO.setTipo(TipoTransaccion.ALQUILER);
         requestDTO.setFechaFin(null);
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(comprador));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
         when(productoRepository.findById(1L)).thenReturn(Optional.of(producto));
 
         // When/Then
@@ -190,7 +179,7 @@ class TransaccionServiceTest {
     void shouldCompleteTransaccionWhenVendedor() {
         // Given
         when(transaccionRepository.findById(1L)).thenReturn(Optional.of(transaccion));
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(vendedor));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(vendedor);
         when(transaccionRepository.save(any(Transaccion.class))).thenReturn(transaccion);
         when(modelMapper.map(any(Transaccion.class), eq(TransaccionResponseDTO.class))).thenReturn(responseDTO);
 
@@ -207,7 +196,7 @@ class TransaccionServiceTest {
     void shouldThrowForbiddenWhenNonVendedorCompletes() {
         // Given
         when(transaccionRepository.findById(1L)).thenReturn(Optional.of(transaccion));
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(comprador));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
 
         // When/Then
         assertThatThrownBy(() -> transaccionService.completar(1L))
@@ -220,7 +209,7 @@ class TransaccionServiceTest {
     void shouldCancelTransaccionWhenComprador() {
         // Given
         when(transaccionRepository.findById(1L)).thenReturn(Optional.of(transaccion));
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(comprador));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
         when(transaccionRepository.save(any(Transaccion.class))).thenReturn(transaccion);
         when(modelMapper.map(any(Transaccion.class), eq(TransaccionResponseDTO.class))).thenReturn(responseDTO);
 
@@ -238,7 +227,7 @@ class TransaccionServiceTest {
         // Given
         transaccion.setEstado(EstadoTransaccion.COMPLETADA);
         when(transaccionRepository.findById(1L)).thenReturn(Optional.of(transaccion));
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(comprador));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
 
         // When/Then
         assertThatThrownBy(() -> transaccionService.cancelar(1L))
@@ -250,7 +239,7 @@ class TransaccionServiceTest {
     @DisplayName("should get mis compras")
     void shouldGetMisCompras() {
         // Given
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(comprador));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
         when(transaccionRepository.findByCompradorId(1L)).thenReturn(List.of(transaccion));
         when(modelMapper.map(any(Transaccion.class), eq(TransaccionResponseDTO.class))).thenReturn(responseDTO);
 
@@ -266,8 +255,8 @@ class TransaccionServiceTest {
     @DisplayName("should get mis ventas")
     void shouldGetMisVentas() {
         // Given
-        when(userRepository.findByEmail("juan@test.com")).thenReturn(Optional.of(vendedor));
-        when(transaccionRepository.findByVendedorId(2L)).thenReturn(List.of(transaccion));
+        when(securityUtils.getUsuarioAutenticado()).thenReturn(comprador);
+        when(transaccionRepository.findByVendedorId(comprador.getId())).thenReturn(List.of(transaccion));
         when(modelMapper.map(any(Transaccion.class), eq(TransaccionResponseDTO.class))).thenReturn(responseDTO);
 
         // When
